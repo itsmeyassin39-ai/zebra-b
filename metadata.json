@@ -1,0 +1,6 @@
+{
+  "name": "Zebra Bags - Maroquinerie de Luxe Monochrome",
+  "description": "Vivez une élégance audacieuse avec Zebra Bags. Découvrez des sacs à main, sacs à dos, bagages et sacs bandoulière artisanaux de luxe inspirés par l'esthétique monochrome sauvage.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

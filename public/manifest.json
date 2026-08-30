@@ -1,0 +1,17 @@
+{
+  "name": "Zebra Bags - Tableau de bord",
+  "short_name": "Zebra Bags",
+  "description": "Boutique de maroquinerie de luxe et tableau de bord en temps réel.",
+  "start_url": "/#/dashboard",
+  "display": "standalone",
+  "background_color": "#0c0c0d",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/assets/imgs/Zebra logo (1).png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
