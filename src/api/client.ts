@@ -1,5 +1,4 @@
 import { getToken } from '../store/auth';
-import { getGoogleToken } from '../store/googleAuth';
 
 interface ApiOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
@@ -7,7 +6,7 @@ interface ApiOptions {
 }
 
 export async function api<T = unknown>(path: string, options: ApiOptions = {}): Promise<T> {
-  const token = getToken() || getGoogleToken();
+  const token = getToken();
   const headers: Record<string, string> = {};
   if (options.body !== undefined) headers['Content-Type'] = 'application/json';
   if (token) headers.Authorization = `Bearer ${token}`;

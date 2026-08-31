@@ -30,10 +30,10 @@ import {
 import { Product, CategoryInfo, InstagramPost, ProductColor, Order, OrderStatus, Currency } from '../types';
 import { useStore } from '../store/StoreContext';
 import { logout, getRememberedEmail, getToken } from '../store/auth';
-import { getGoogleToken } from '../store/googleAuth';
 import { api } from '../api/client';
 import { formatPrice } from '../utils/formatters';
 import { connectOrderStream, playNewOrderChime } from '../store/liveOrders';
+import ImageUploadField from '../components/ImageUploadField';
 import {
   enablePush,
   disablePush,
@@ -237,7 +237,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
 
   // 2. Écoute en direct des commandes (SSE) + déclenchement de la notification navigateur & carillon
   useEffect(() => {
-    const token = getToken() || getGoogleToken();
+    const token = getToken();
     if (!token) return;
     const dispose = connectOrderStream(token, (order) => {
       setLiveOrder(order);
@@ -853,30 +853,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
 
                 <div className="space-y-5">
                   <div>
-                    <label className={labelCls}>Photo du produit</label>
-                    <div className="flex items-center gap-4">
-                      {productForm.main ? (
-                        <img
-                          src={productForm.main}
-                          alt="Aperçu"
-                          referrerPolicy="no-referrer"
-                          className="w-24 h-24 rounded-xl object-cover bg-zinc-100 border border-zinc-200 shrink-0"
-                        />
-                      ) : (
-                        <div className="w-24 h-24 rounded-xl bg-zinc-100 border border-zinc-200 flex items-center justify-center text-zinc-300 shrink-0">
-                          <ShoppingBag className="w-7 h-7" />
-                        </div>
-                      )}
-                      <div className="flex-1">
-                        <input
-                          className={inputCls}
-                          value={productForm.main}
-                          onChange={(e) => setProductForm((f) => ({ ...f, main: e.target.value }))}
-                          placeholder="Collez le lien de la photo…"
-                        />
-                        <p className={labelHint}>Astuce : écrivez <code className="bg-zinc-100 px-1 rounded">/assets/imgs/ma-photo.jpg</code> pour une photo de votre boutique.</p>
-                      </div>
-                    </div>
+                    <ImageUploadField
+                      label="Photo du produit"
+                      value={productForm.main}
+                      onChange={(url) => setProductForm((f) => ({ ...f, main: url }))}
+                      hint="Choisissez une photo depuis votre téléphone. Elle sera automatiquement chargée sur le serveur."
+                    />
                   </div>
 
                   <div>
@@ -1000,16 +982,28 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className={labelCls}>Photo au survol</label>
-                        <input className={inputCls} value={productForm.hover} onChange={(e) => setProductForm((f) => ({ ...f, hover: e.target.value }))} placeholder="/assets/imgs/…" />
+                        <ImageUploadField
+                          label="Photo au survol"
+                          compact
+                          value={productForm.hover}
+                          onChange={(url) => setProductForm((f) => ({ ...f, hover: url }))}
+                        />
                       </div>
                       <div>
-                        <label className={labelCls}>Photo en détail</label>
-                        <input className={inputCls} value={productForm.detail} onChange={(e) => setProductForm((f) => ({ ...f, detail: e.target.value }))} placeholder="/assets/imgs/…" />
+                        <ImageUploadField
+                          label="Photo en détail"
+                          compact
+                          value={productForm.detail}
+                          onChange={(url) => setProductForm((f) => ({ ...f, detail: url }))}
+                        />
                       </div>
                       <div className="col-span-2">
-                        <label className={labelCls}>Photo en situation</label>
-                        <input className={inputCls} value={productForm.lifestyle} onChange={(e) => setProductForm((f) => ({ ...f, lifestyle: e.target.value }))} placeholder="/assets/imgs/…" />
+                        <ImageUploadField
+                          label="Photo en situation"
+                          compact
+                          value={productForm.lifestyle}
+                          onChange={(url) => setProductForm((f) => ({ ...f, lifestyle: url }))}
+                        />
                       </div>
                     </div>
 
@@ -1322,6 +1316,23 @@ const NotificationSettingsModal: React.FC<{
   onTogglePush,
   onTestNotification,
 }) => {
+  const [serverDevices, setServerDevices] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    let cancelled = false;
+    api<{ count: number }>('/api/push/status')
+      .then((d) => {
+        if (!cancelled) setServerDevices(d.count);
+      })
+      .catch(() => {
+        if (!cancelled) setServerDevices(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
@@ -1397,22 +1408,48 @@ const NotificationSettingsModal: React.FC<{
           </div>
 
           {/* Push Web background section */}
-          <div className="pt-4 border-t border-zinc-100 flex items-center justify-between text-xs">
-            <div>
-              <p className="font-bold text-zinc-800">Notifications en arrière-plan (Push)</p>
-              <p className="text-zinc-500 text-[11px]">Fonctionne même onglet fermé / mobile</p>
+          <div className="pt-4 border-t border-zinc-100">
+            <div className="flex items-center justify-between text-xs">
+              <div>
+                <p className="font-bold text-zinc-800">Notifications en arrière-plan (Push)</p>
+                <p className="text-zinc-500 text-[11px]">Fonctionne même onglet fermé / mobile</p>
+              </div>
+              <button
+                onClick={onTogglePush}
+                disabled={busy || permission === 'denied'}
+                className={`px-3 py-1.5 rounded-xl font-bold transition-colors cursor-pointer ${
+                  pushStatus === 'on'
+                    ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                    : 'bg-zinc-200 text-zinc-700 hover:bg-zinc-300'
+                } disabled:opacity-40 disabled:cursor-not-allowed`}
+              >
+                {pushStatus === 'on' ? 'Activé' : 'Désactivé'}
+              </button>
             </div>
-            <button
-              onClick={onTogglePush}
-              disabled={busy || permission === 'denied'}
-              className={`px-3 py-1.5 rounded-xl font-bold transition-colors cursor-pointer ${
-                pushStatus === 'on'
-                  ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                  : 'bg-zinc-200 text-zinc-700 hover:bg-zinc-300'
-              } disabled:opacity-40 disabled:cursor-not-allowed`}
-            >
-              {pushStatus === 'on' ? 'Activé' : 'Désactivé'}
-            </button>
+
+            <div className="mt-3 p-3 rounded-xl bg-zinc-50 border border-zinc-200">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-zinc-500">Appareils enregistrés sur le serveur</span>
+                {serverDevices === null ? (
+                  <span className="text-zinc-400">…</span>
+                ) : serverDevices > 0 ? (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    {serverDevices}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 text-red-700 font-bold">
+                    <span className="w-2 h-2 rounded-full bg-red-500" />
+                    0
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] text-zinc-500 mt-1.5 leading-relaxed">
+                {serverDevices === 0
+                  ? 'Aucun appareil : le push arrêté ne vous notifiera pas app fermé. Activez le bouton ci-dessus avec ce téléphone.'
+                  : 'Ce chiffre doit être d\u2019au moins 1 pour que la notification arrive quand l\u2019app est fermée. Restez sur Chrome (désactivez Brave) et laissez le téléphone allumé.'}
+              </p>
+            </div>
           </div>
         </div>
 

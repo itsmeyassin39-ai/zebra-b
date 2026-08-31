@@ -2,7 +2,6 @@ import React, { createContext, useContext, useCallback, useEffect, useMemo, useS
 import { Product, CategoryInfo, InstagramPost } from '../types';
 import { api } from '../api/client';
 import { clearSession } from './auth';
-import { clearGoogleSession } from './googleAuth';
 
 export interface StoreData {
   products: Product[];
@@ -49,7 +48,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const e = err as Error & { status?: number };
       if (e.status === 401) {
         clearSession();
-        clearGoogleSession();
         window.location.reload();
         return;
       }

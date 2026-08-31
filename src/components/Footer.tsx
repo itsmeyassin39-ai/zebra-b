@@ -16,7 +16,6 @@ import {
 import { BagCategory } from '../types';
 import { useStore } from '../store/StoreContext';
 import { clearSession } from '../store/auth';
-import { clearGoogleSession } from '../store/googleAuth';
 import { api } from '../api/client';
 
 const LOGO_URL = '/assets/imgs/Zebra logo (1).png';
@@ -192,7 +191,6 @@ export const Footer: React.FC<FooterProps> = ({
                   .catch(() => undefined)
                   .finally(() => {
                     clearSession();
-                    clearGoogleSession();
                     window.location.reload();
                   });
               }}

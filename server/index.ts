@@ -14,10 +14,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, '..');
 const PORT = Number(process.env.PORT || 3001);
 
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID?.trim() || '';
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET?.trim() || '';
 const ROOT_URL = (process.env.APP_URL?.trim() || `http://localhost:${PORT}`).replace(/\/+$/, '');
-const GOOGLE_REDIRECT_URI = `${ROOT_URL}/api/auth/google/callback`;
 
 // ----- Web Push (notifications téléphone) -----
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY?.trim() || '';
@@ -72,6 +69,11 @@ const DDL = [
     item_count INTEGER NOT NULL DEFAULT 0,
     image TEXT NOT NULL DEFAULT '',
     badge TEXT NOT NULL DEFAULT ''
+  )`,
+  `CREATE TABLE IF NOT EXISTS uploaded_images (
+    id TEXT PRIMARY KEY,
+    mime TEXT NOT NULL DEFAULT 'image/jpeg',
+    data TEXT NOT NULL
   )`,
   `CREATE TABLE IF NOT EXISTS instagram_posts (
     id TEXT PRIMARY KEY,
@@ -389,7 +391,7 @@ function requireAuth(fn: (req: Request, res: Response) => Promise<void>) {
 // EXPRESS
 // =====================================================================
 const app = express();
-app.use(express.json({ limit: '5mb' }));
+app.use(express.json({ limit: '15mb' }));
 
 // ----- Auth -----
 app.post('/api/auth/login', async (req, res, next) => {
@@ -424,66 +426,6 @@ app.post('/api/auth/logout', requireAuth(async (req, res) => {
   res.json({ ok: true });
 }));
 
-// ----- Google sign-in (connexion au site) -----
-const oauthStates = new Map<string, number>();
-
-app.get('/api/auth/google', (req, res) => {
-  if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
-    res.redirect('/?gd_error=noconfig');
-    return;
-  }
-  const state = generateToken();
-  oauthStates.set(state, Date.now());
-  const url = new URL('https://accounts.google.com/o/oauth2/v2/auth');
-  url.searchParams.set('client_id', GOOGLE_CLIENT_ID);
-  url.searchParams.set('redirect_uri', GOOGLE_REDIRECT_URI);
-  url.searchParams.set('response_type', 'code');
-  url.searchParams.set('scope', 'openid email profile');
-  url.searchParams.set('state', state);
-  res.redirect(url.toString());
-});
-
-app.get('/api/auth/google/callback', async (req, res, next) => {
-  try {
-    const code = String(req.query.code ?? '');
-    const state = String(req.query.state ?? '');
-    if (req.query.error) throw new Error('Connexion Google refusée.');
-    if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) throw new Error('Google non configuré.');
-    const issuedAt = oauthStates.get(state);
-    if (!issuedAt || Date.now() - issuedAt > 10 * 60_000) {
-      throw new Error('Connexion expirée, veuillez réessayer.');
-    }
-    oauthStates.delete(state);
-
-    const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        code,
-        client_id: GOOGLE_CLIENT_ID,
-        client_secret: GOOGLE_CLIENT_SECRET,
-        redirect_uri: GOOGLE_REDIRECT_URI,
-        grant_type: 'authorization_code',
-      }),
-    });
-    const tokenData = (await tokenRes.json()) as { access_token?: string };
-    if (!tokenData.access_token) throw new Error('Échec de l\u2019échange du code Google.');
-
-    const userRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-      headers: { Authorization: `Bearer ${tokenData.access_token}` },
-    });
-    const user = (await userRes.json()) as { email?: string };
-    if (!user || !user.email) throw new Error('Impossible de récupérer votre compte Google.');
-
-    const sessionToken = generateToken();
-    await db.run('INSERT INTO sessions (token) VALUES (?)', [sessionToken]);
-
-    res.redirect(`/?gd=${sessionToken}`);
-  } catch (err) {
-    res.redirect('/?gd_error=auth');
-  }
-});
-
 app.put('/api/auth/credentials', requireAuth(async (req, res) => {
   const { currentPassword, email, newPassword } = req.body as any;
   const admin = await db.all(
@@ -510,12 +452,66 @@ app.put('/api/auth/credentials', requireAuth(async (req, res) => {
   res.json({ ok: true });
 }));
 
-// ----- Data (visiteurs connectés via Google ; écritures protégées) -----
-app.get('/api/all', requireAuth(async (_req, res) => {
-  res.json(await fetchAll());
-}));
+// ----- Data (lecture publique pour la boutique ; écritures protégées) -----
+app.get('/api/all', async (_req, res, next) => {
+  try {
+    res.json(await fetchAll());
+  } catch (err) {
+    next(err);
+  }
+});
 
 // Products
+
+// Upload d'une image depuis le téléphone : stocke les octets dans la base
+// (compatible SQLite local + Turso) et renvoie une URL servie par le serveur.
+app.post('/api/upload', requireAuth(async (req, res) => {
+  try {
+    const body = req.body as { name?: string; data?: string };
+    const b64 = String(body?.data ?? '');
+    if (!b64 || b64.length < 100) {
+      res.status(400).json({ error: 'Image vide.' });
+      return;
+    }
+    const buf = Buffer.from(b64, 'base64');
+    if (buf.length > 8 * 1024 * 1024) {
+      res.status(413).json({ error: 'Image trop lourde (max 8 Mo).' });
+      return;
+    }
+    let mime = 'image/jpeg';
+    if (b64.startsWith('/9j/')) mime = 'image/jpeg';
+    else if (b64.startsWith('iVBORw0KGgo')) mime = 'image/png';
+    else if (b64.startsWith('UklGR')) mime = 'image/webp';
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    await db.run(
+      'INSERT INTO uploaded_images (id, mime, data) VALUES (?, ?, ?)',
+      [id, mime, b64]
+    );
+    res.json({ url: `/api/uploaded/${id}` });
+  } catch (e) {
+    console.error('Erreur upload:', e);
+    res.status(500).json({ error: 'Erreur serveur lors de l\u2019envoi de la photo.' });
+  }
+}));
+
+app.get('/api/uploaded/:id', async (req, res, next) => {
+  try {
+    const rows = await db.all(
+      'SELECT mime, data FROM uploaded_images WHERE id = ?',
+      [req.params.id]
+    );
+    if (rows.length === 0) {
+      res.status(404).json({ error: 'Image introuvable.' });
+      return;
+    }
+    res.setHeader('Content-Type', String(rows[0].mime));
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    res.send(Buffer.from(String(rows[0].data), 'base64'));
+  } catch (e) {
+    next(e);
+  }
+});
+
 app.get('/api/products', requireAuth(async (_req, res) => {
   const result = await db.all(selectProducts, []);
   res.json(result.map((r) => rowToProduct(r)));
@@ -850,6 +846,17 @@ app.post('/api/push/test', requireAuth(async (_req, res) => {
     url: '/#/dashboard',
   });
   res.json({ ok: true, sent });
+}));
+
+app.get('/api/push/status', requireAuth(async (_req, res) => {
+  const rows = await db.all('SELECT endpoint, created_at FROM push_subscriptions', []);
+  res.json({
+    count: rows.length,
+    devices: rows.map((r) => ({
+      id: String(r.endpoint).slice(-12),
+      createdAt: String(r.created_at ?? ''),
+    })),
+  });
 }));
 
 app.post('/api/orders', async (req, res, next) => {
