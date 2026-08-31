@@ -1446,9 +1446,22 @@ const NotificationSettingsModal: React.FC<{
               </div>
               <p className="text-[11px] text-zinc-500 mt-1.5 leading-relaxed">
                 {serverDevices === 0
-                  ? 'Aucun appareil : le push arrêté ne vous notifiera pas app fermé. Activez le bouton ci-dessus avec ce téléphone.'
-                  : 'Ce chiffre doit être d\u2019au moins 1 pour que la notification arrive quand l\u2019app est fermée. Restez sur Chrome (désactivez Brave) et laissez le téléphone allumé.'}
+                  ? 'Aucun appareil : la notification n\u2019arrivera pas en arrière-plan. Activez le bouton ci-dessus avec ce téléphone.'
+                  : 'Ce chiffre doit être d\u2019au moins 1 pour que la notification arrive même quand l\u2019air est fermé.'}
               </p>
+            </div>
+
+            {/* Guide mobile : comment vraiment recevoir la notification */}
+            <div className="mt-3 p-3 rounded-xl bg-amber-50 border border-amber-200">
+              <p className="text-[11px] font-bold text-amber-900 mb-1.5">
+                📲 Pour recevoir l\u2019alerte même quand Chrome est fermé (sur téléphone) :
+              </p>
+              <ol className="text-[11px] text-amber-900 list-decimal pl-4 space-y-1 leading-relaxed">
+                <li><b>Installez le site</b> : dans Chrome, menu ⋮ → « Ajouter à l\u2019écran d\u2019accueil » (ou « Installer l\u2019application »). Ouvrez-le ensuite depuis cet icône, pas depuis un onglet.</li>
+                <li><b>Autorisez les notifications</b> avec ce téléphone (bouton ci-dessus).</li>
+                <li><b>Empêchez Chrome d\u2019être mis en veille</b> : Réglages → Applications → Chrome → Batterie → « <b>Sans restriction</b> » (et désactivez l\u2019économiseur de batterie).</li>
+                <li><b>Restez sur Chrome</b> (désactivez Brave) et gardez le téléphone <b>allumé</b> : aucun système ne peut afficher une notification si le téléphone est éteint.</li>
+              </ol>
             </div>
           </div>
         </div>
