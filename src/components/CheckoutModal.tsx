@@ -343,7 +343,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm sm:text-base font-bold text-white pt-2 border-t border-zinc-800">
-                    <span>Total à payer</span>
+                    <span>Prix Total</span>
                     <span className="font-mono text-lg text-white">
                       {formatPrice(grandTotal, currentCurrency)}
                     </span>
@@ -418,9 +418,15 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 <span className="text-zinc-400">Adresse :</span>
                 <span className="text-zinc-200 truncate max-w-[200px]">{formData.address}</span>
               </div>
-              <div className="flex items-center justify-between pt-1">
+              <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
                 <span className="text-zinc-400">Mode de Paiement :</span>
                 <span className="text-emerald-400 font-bold">Paiement à la livraison</span>
+              </div>
+              <div className="flex items-center justify-between pt-1">
+                <span className="text-white font-bold">Prix Total</span>
+                <span className="text-white font-bold">
+                  {formatPrice(grandTotal, currentCurrency)}
+                </span>
               </div>
             </div>
 

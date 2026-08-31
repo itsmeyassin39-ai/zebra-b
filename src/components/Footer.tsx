@@ -2,15 +2,9 @@ import React from 'react';
 import {
   Instagram,
   Facebook,
-  Twitter,
-  Linkedin,
-  Youtube,
-  Shield,
-  CreditCard,
   Lock,
   ArrowUp,
   Mail,
-  MapPin,
   Phone,
 } from 'lucide-react';
 import { BagCategory } from '../types';
@@ -63,25 +57,35 @@ export const Footer: React.FC<FooterProps> = ({
 
             {/* Social Icons */}
             <div className="flex items-center space-x-3 pt-2">
-              {[
-                { icon: Instagram, href: '#instagram', label: 'Instagram' },
-                { icon: Facebook, href: '#facebook', label: 'Facebook' },
-                { icon: Twitter, href: '#twitter', label: 'Twitter' },
-                { icon: Linkedin, href: '#linkedin', label: 'LinkedIn' },
-                { icon: Youtube, href: '#youtube', label: 'YouTube' },
-              ].map((soc, idx) => {
-                const Icon = soc.icon;
-                return (
-                  <a
-                    key={idx}
-                    href={soc.href}
-                    aria-label={soc.label}
-                    className="w-9 h-9 rounded-full bg-white border border-zinc-300 text-zinc-700 hover:text-black hover:border-black flex items-center justify-center transition-colors shadow-sm"
-                  >
-                    <Icon className="w-4 h-4" />
-                  </a>
-                );
-              })}
+              <a
+                href="https://www.facebook.com/Zebrabags.Official/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                className="w-9 h-9 rounded-full bg-white border border-zinc-300 text-zinc-700 hover:text-black hover:border-black flex items-center justify-center transition-colors shadow-sm"
+              >
+                <Facebook className="w-4 h-4" />
+              </a>
+              <a
+                href="https://www.instagram.com/zebrabags.officiel/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="w-9 h-9 rounded-full bg-white border border-zinc-300 text-zinc-700 hover:text-black hover:border-black flex items-center justify-center transition-colors shadow-sm"
+              >
+                <Instagram className="w-4 h-4" />
+              </a>
+              <a
+                href="https://www.tiktok.com/@zebra_bags?_r=1&_t=ZS-99Jnn4dsSZg"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="TikTok"
+                className="w-9 h-9 rounded-full bg-white border border-zinc-300 text-zinc-700 hover:text-black hover:border-black flex items-center justify-center transition-colors shadow-sm"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
+                </svg>
+              </a>
             </div>
           </div>
 
@@ -159,16 +163,15 @@ export const Footer: React.FC<FooterProps> = ({
             </h4>
             <ul className="space-y-3 text-xs text-zinc-600">
               <li className="flex items-start gap-2.5">
-                <MapPin className="w-4 h-4 text-zinc-700 shrink-0 mt-0.5" />
-                <span>Via de' Tornabuoni 14R, 50123 Firenze FI, Italy</span>
+
               </li>
               <li className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-zinc-700 shrink-0" />
-                <span>+39 055 291 8401</span>
+                <span>+212779440140</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-zinc-700 shrink-0" />
-                <span>concierge@zebrabags.it</span>
+                <span>Zebrabegs@gmail.com</span>
               </li>
             </ul>
           </div>

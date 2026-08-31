@@ -13,7 +13,7 @@ interface AnnouncementBarProps {
 const MESSAGES = [
   {
     icon: Truck,
-    text: 'LIVRAISON EXPRESS OFFERTE SUR TOUTES LES COMMANDES, PARTOUT DANS LE MONDE',
+    text: 'LIVRAISON EXPRESS OFFERTE SUR TOUTES LES COMMANDES, PARTOUT AU MAROC',
     highlight: 'EXPRESS OFFERT',
   },
   {

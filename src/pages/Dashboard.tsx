@@ -19,6 +19,7 @@ import {
   RefreshCw,
   ChevronDown,
   ChevronUp,
+  MessageSquare,
   Lock,
   LogOut,
   Bell,
@@ -27,7 +28,7 @@ import {
   Volume2,
   Sparkles,
 } from 'lucide-react';
-import { Product, CategoryInfo, InstagramPost, ProductColor, Order, OrderStatus, Currency } from '../types';
+import { Product, CategoryInfo, InstagramPost, ProductColor, Order, OrderStatus, Currency, CustomerReview } from '../types';
 import { useStore } from '../store/StoreContext';
 import { logout, getRememberedEmail, getToken } from '../store/auth';
 import { api } from '../api/client';
@@ -50,12 +51,13 @@ interface DashboardProps {
   onClose: () => void;
 }
 
-type TabId = 'products' | 'categories' | 'posts' | 'orders';
+type TabId = 'products' | 'categories' | 'posts' | 'reviews' | 'orders';
 
 const TABS: { id: TabId; label: string; icon: React.FC<{ className?: string }> }[] = [
   { id: 'products', label: 'Mes produits', icon: ShoppingBag },
   { id: 'categories', label: 'Mes catégories', icon: Folder },
   { id: 'posts', label: 'Mes publications', icon: Instagram },
+  { id: 'reviews', label: 'Mes avis', icon: MessageSquare },
   { id: 'orders', label: 'Mes commandes', icon: ClipboardList },
 ];
 
@@ -316,6 +318,22 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
     emptyPostForm(store.products[0]?.id ?? '')
   );
 
+  // review editor state
+  const [reviewDrawerOpen, setReviewDrawerOpen] = useState(false);
+  const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
+  const [reviewForm, setReviewForm] = useState<CustomerReview>({
+    id: '',
+    author: '',
+    location: '',
+    rating: 5,
+    date: '',
+    title: '',
+    comment: '',
+    productPurchased: '',
+    verified: true,
+    avatarUrl: '',
+  });
+
   const [searchTerm, setSearchTerm] = useState('');
   const [securityOpen, setSecurityOpen] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -440,6 +458,71 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
       notify('Publication ajoutée ✓');
     }
     setPostDrawerOpen(false);
+  };
+
+  const openNewReview = () => {
+    setEditingReviewId(null);
+    setFormError('');
+    setReviewForm({
+      id: '',
+      author: '',
+      location: '',
+      rating: 5,
+      date: 'récemment',
+      title: '',
+      comment: '',
+      productPurchased: '',
+      verified: true,
+      avatarUrl: '',
+    });
+    setReviewDrawerOpen(true);
+  };
+
+  const openEditReview = (r: CustomerReview) => {
+    setEditingReviewId(r.id);
+    setFormError('');
+    setReviewForm({
+      ...r,
+      avatarUrl: r.avatarUrl ?? '',
+    });
+    setReviewDrawerOpen(true);
+  };
+
+  const handleSaveReview = async () => {
+    if (!reviewForm.author.trim()) {
+      setFormError('Donnez un nom au client.');
+      return;
+    }
+    if (!reviewForm.comment.trim()) {
+      setFormError('Écrivez le commentaire de l\u2019avis.');
+      return;
+    }
+    const payload: CustomerReview = {
+      ...reviewForm,
+      author: reviewForm.author.trim(),
+      location: reviewForm.location.trim(),
+      title: reviewForm.title.trim(),
+      comment: reviewForm.comment.trim(),
+      productPurchased: reviewForm.productPurchased.trim(),
+      date: reviewForm.date.trim() || 'récemment',
+      avatarUrl: '',
+    };
+    try {
+      if (editingReviewId) {
+        await store.updateCustomerReview(editingReviewId, payload);
+        notify('Avis modifié ✓');
+      } else {
+        await store.addCustomerReview({ ...payload, id: `review-${Date.now()}` });
+        notify('Avis ajouté ✓');
+      }
+      setReviewDrawerOpen(false);
+    } catch (error) {
+      if (error instanceof Error) {
+        setFormError(error.message);
+        return;
+      }
+      setFormError('Erreur lors de l\u2019enregistrement. Réessayez.');
+    }
   };
 
   const handleExport = () => {
@@ -742,6 +825,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
 
         {/* ================= CATEGORIES ================= */}
         {tab === 'categories' && <CategoriesTab />}
+
+        {/* ================= AVIS ================= */}
+        {tab === 'reviews' && (
+          <ReviewsTab
+            onNew={() => openNewReview()}
+            onEdit={(r) => openEditReview(r)}
+          />
+        )}
 
         {/* ================= COMMANDES ================= */}
         {tab === 'orders' && <OrdersTab liveOrder={liveOrder} />}
@@ -1178,6 +1269,106 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
         </div>
       )}
 
+      {/* ================= ÉDITEUR AVIS ================= */}
+      {reviewDrawerOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end">
+          <div className="w-full max-w-xl bg-white h-full overflow-y-auto shadow-2xl">
+            <div className="sticky top-0 bg-white border-b border-zinc-200 px-6 py-4 flex items-center justify-between z-10">
+              <h2 className="font-display text-lg font-extrabold">
+                {editingReviewId ? 'Modifier l\u2019avis' : 'Nouvel avis'}
+              </h2>
+              <button
+                onClick={() => {
+                  if (window.confirm('Fermer sans enregistrer ?')) setReviewDrawerOpen(false);
+                }}
+                className="p-2 rounded-xl hover:bg-zinc-100 cursor-pointer"
+                title="Fermer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-5">
+              {formError && (
+                <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 text-sm font-semibold px-4 py-3 rounded-xl">
+                  <AlertTriangle className="w-5 h-5" />
+                  {formError}
+                </div>
+              )}
+
+              <div className="hidden" aria-hidden="true">
+                <ImageUploadField
+                  label="Photo du client"
+                  value={reviewForm.avatarUrl ?? ''}
+                  onChange={(url) => setReviewForm((f) => ({ ...f, avatarUrl: url }))}
+                  hint="Choisissez une photo depuis votre téléphone. Elle sera automatiquement chargée sur le serveur."
+                />
+              </div>
+
+              <div>
+                <label className={labelCls}>Nom complet du client</label>
+                <input className={inputCls} value={reviewForm.author} onChange={(e) => setReviewForm((f) => ({ ...f, author: e.target.value }))} placeholder="Ex : Denis Slavska" />
+              </div>
+
+
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className={labelCls}>Ville / Pays</label>
+                  <input className={inputCls} value={reviewForm.location} onChange={(e) => setReviewForm((f) => ({ ...f, location: e.target.value }))} placeholder="Ex : Casablanca, Maroc ou New York" />
+                </div>
+                <div>
+                  <label className={labelCls}>Date</label>
+                  <input className={inputCls} value={reviewForm.date} onChange={(e) => setReviewForm((f) => ({ ...f, date: e.target.value }))} placeholder="il y a 2 jours" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className={labelCls}>Note (1 à 5)</label>
+                  <input type="number" min={1} max={5} className={inputCls} value={reviewForm.rating} onChange={(e) => setReviewForm((f) => ({ ...f, rating: Math.min(5, Math.max(1, Number(e.target.value) || 5)) }))} />
+                </div>
+                <div>
+                  <label className={labelCls}>Produit acheté (optionnel)</label>
+                  <input className={inputCls} value={reviewForm.productPurchased} onChange={(e) => setReviewForm((f) => ({ ...f, productPurchased: e.target.value }))} placeholder="Ex : Cabas Monolithe" />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelCls}>Titre court (optionnel)</label>
+                <input className={inputCls} value={reviewForm.title} onChange={(e) => setReviewForm((f) => ({ ...f, title: e.target.value }))} placeholder="Ex : Excellente qualité" />
+              </div>
+
+              <div>
+                <label className={labelCls}>Commentaire / Déclaration du client</label>
+                <textarea rows={4} className={inputCls} value={reviewForm.comment} onChange={(e) => setReviewForm((f) => ({ ...f, comment: e.target.value }))} placeholder="Ex : Ils adaptent parfaitement leurs créations à nos exigences spécifiques." />
+                <p className={labelHint}>Ce texte apparaîtra en grand format sur la carte du site.</p>
+              </div>
+
+              <label className="flex items-center gap-3 text-sm font-semibold text-zinc-800 cursor-pointer bg-zinc-50 border border-zinc-200 px-4 py-3 rounded-xl">
+                <input type="checkbox" checked={reviewForm.verified} onChange={(e) => setReviewForm((f) => ({ ...f, verified: e.target.checked }))} />
+                Avis vérifié (Acheteur certifié)
+              </label>
+            </div>
+
+            <div className="sticky bottom-0 bg-white border-t border-zinc-200 px-6 py-4 flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  if (window.confirm('Fermer sans enregistrer ?')) setReviewDrawerOpen(false);
+                }}
+                className={btnSecondary}
+              >
+                Annuler
+              </button>
+              <button onClick={handleSaveReview} className={btnPrimary}>
+                <Save className="w-4 h-4" />
+                Enregistrer l\u2019avis
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modal sécurité */}
       {securityOpen && (
         <SecurityModal
@@ -1482,7 +1673,6 @@ const NotificationSettingsModal: React.FC<{
 const CategoriesTab: React.FC = () => {
   const store = useStore();
   const [newName, setNewName] = useState('');
-  const [newTagline, setNewTagline] = useState('');
 
   const productCount = (id: string) => store.products.filter((p) => p.category === id).length;
 
@@ -1500,13 +1690,12 @@ const CategoriesTab: React.FC = () => {
     store.addCategory({
       id,
       name: newName.trim(),
-      tagline: newTagline.trim() || 'Nouvelle collection',
+      tagline: '',
       itemCount: 0,
       image: '',
       badge: '',
     });
     setNewName('');
-    setNewTagline('');
   };
 
   return (
@@ -1523,16 +1712,12 @@ const CategoriesTab: React.FC = () => {
             Ajouter une nouvelle catégorie
           </span>
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
             <label className={labelCls}>Nom de la catégorie</label>
             <input className={inputCls} value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Ex : Mallette" />
           </div>
-          <div>
-            <label className={labelCls}>Petite description (optionnel)</label>
-            <input className={inputCls} value={newTagline} onChange={(e) => setNewTagline(e.target.value)} placeholder="Ex : Pour les cadres exigeants" />
-          </div>
-          <div className="flex items-end">
+          <div className="sm:self-end">
             <button onClick={addCategory} disabled={!newName.trim()} className={`${btnPrimary} w-full disabled:opacity-40 disabled:cursor-not-allowed`}>
               <Plus className="w-4 h-4" />
               Ajouter la catégorie
@@ -1553,13 +1738,10 @@ const CategoriesTab: React.FC = () => {
 const CategoryCard: React.FC<{ category: CategoryInfo; productCount: number }> = ({ category, productCount }) => {
   const store = useStore();
   const [name, setName] = useState(category.name);
-  const [tagline, setTagline] = useState(category.tagline);
-  const [image, setImage] = useState(category.image);
-  const [badge, setBadge] = useState(category.badge ?? '');
 
   const save = () => {
     if (!name.trim()) return;
-    store.updateCategory(category.id, { name: name.trim(), tagline, image, badge: badge || undefined, itemCount: productCount });
+    store.updateCategory(category.id, { name: name.trim(), itemCount: productCount });
   };
 
   const remove = () => {
@@ -1574,16 +1756,10 @@ const CategoryCard: React.FC<{ category: CategoryInfo; productCount: number }> =
 
   return (
     <div className="bg-white rounded-2xl border border-zinc-200 p-6 shadow-sm">
-      <div className="flex items-start justify-between mb-5">
+      <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
-          <div className="w-14 h-14 rounded-xl overflow-hidden bg-zinc-100 border border-zinc-200">
-            {image ? (
-              <img src={image} alt={category.name} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-zinc-300">
-                <Folder className="w-5 h-5" />
-              </div>
-            )}
+          <div className="w-14 h-14 rounded-xl bg-zinc-100 border border-zinc-200 flex items-center justify-center text-zinc-300 shrink-0">
+            <Folder className="w-6 h-6" />
           </div>
           <div>
             <div className="font-bold text-base">{category.name}</div>
@@ -1601,24 +1777,103 @@ const CategoryCard: React.FC<{ category: CategoryInfo; productCount: number }> =
           <label className={labelCls}>Nom de la catégorie</label>
           <input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} />
         </div>
-        <div>
-          <label className={labelCls}>Petite description</label>
-          <input className={inputCls} value={tagline} onChange={(e) => setTagline(e.target.value)} />
-        </div>
-        <div>
-          <label className={labelCls}>Image (photo de la catégorie)</label>
-          <input className={inputCls} value={image} onChange={(e) => setImage(e.target.value)} placeholder="/assets/imgs/…" />
-        </div>
-        <div>
-          <label className={labelCls}>Badge (optionnel)</label>
-          <input className={inputCls} value={badge} onChange={(e) => setBadge(e.target.value)} />
-        </div>
         <button onClick={save} className={`${btnPrimary} w-full justify-center`}>
           <Save className="w-4 h-4" />
           Enregistrer la catégorie
         </button>
       </div>
     </div>
+  );
+};
+
+const ReviewsTab: React.FC<{ onNew: () => void; onEdit: (r: CustomerReview) => void }> = ({
+  onNew,
+  onEdit,
+}) => {
+  const store = useStore();
+  const reviews = store.customerReviews;
+
+  const remove = (r: CustomerReview) => {
+    if (window.confirm(`Supprimer l\u2019avis de « ${r.author} » ?`)) {
+      store.deleteCustomerReview(r.id);
+    }
+  };
+
+  const initials = (name: string) => name.trim().charAt(0).toUpperCase() || '?';
+
+  return (
+    <section>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div className="text-zinc-600">
+          <span className="font-bold">{reviews.length}</span> avis
+        </div>
+        <button onClick={onNew} className={btnPrimary}>
+          <Plus className="w-4 h-4" />
+          Ajouter un avis
+        </button>
+      </div>
+
+      {reviews.length === 0 ? (
+        <div className="text-center py-24 bg-white rounded-2xl border border-zinc-200">
+          <MessageSquare className="w-10 h-10 text-zinc-300 mx-auto mb-3" />
+          <p className="text-zinc-500">Aucun avis pour le moment.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {reviews.map((r) => (
+            <div key={r.id} className="bg-white rounded-2xl border border-zinc-200 p-5 shadow-sm flex flex-col">
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-11 h-11 rounded-full bg-zinc-900 text-white flex items-center justify-center font-display text-sm shrink-0">
+                    {initials(r.author)}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-bold text-sm text-zinc-900 truncate flex items-center gap-1.5">
+                      {r.author}
+                      {r.verified && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />}
+                    </div>
+                    <div className="text-[10px] text-zinc-400 font-mono mt-0.5 truncate">
+                      {r.location ? `${r.location} • ` : ''}
+                      {r.date}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-col items-end gap-1.5 shrink-0">
+                  <span className="text-xs font-mono text-zinc-700 bg-zinc-100 px-2 py-0.5 rounded-full font-bold">★ {r.rating}/5</span>
+                </div>
+              </div>
+
+              {r.title && <div className="font-semibold text-sm text-zinc-900 mb-1">{r.title}</div>}
+              <p className="text-sm text-zinc-700 leading-relaxed line-clamp-3 italic">
+                &ldquo;{r.comment}&rdquo;
+              </p>
+              {r.productPurchased && (
+                <div className="mt-2 text-[10px] font-mono uppercase tracking-wider text-zinc-400">
+                  Acheté : {r.productPurchased}
+                </div>
+              )}
+
+              <div className="mt-4 pt-4 border-t border-zinc-100 flex gap-2">
+                <button
+                  onClick={() => remove(r)}
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-red-200 text-red-600 text-sm font-bold hover:bg-red-50 transition-colors cursor-pointer"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Supprimer
+                </button>
+                <button
+                  onClick={() => onEdit(r)}
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-black text-white text-sm font-bold hover:bg-zinc-800 transition-colors cursor-pointer"
+                >
+                  <Pencil className="w-4 h-4" />
+                  Modifier
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
   );
 };
 

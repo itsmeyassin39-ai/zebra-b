@@ -24,8 +24,8 @@ const PERKS = [
   },
   {
     icon: Truck,
-    title: 'Livraison Express Mondiale Neutre en Carbone',
-    description: 'Livraison DHL Express prioritaire offerte sur toutes les commandes, sans minimum d\'achat.',
+    title: 'Livraison Express partout au Maroc',
+    description: 'Livraison express offerte partout au Maroc, sans minimum d\'achat.',
   },
 ];
 

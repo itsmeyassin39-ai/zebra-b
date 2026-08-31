@@ -85,7 +85,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 <Truck className="w-3.5 h-3.5" />
                 {amountNeededForFreeShipping === 0 ? (
                   <span className="text-white font-semibold">
-                    Vous avez débloqué la Livraison Express Gratuite !
+                    Livraison Express Gratuite partout au Maroc !
                   </span>
                 ) : (
                   <span>
@@ -93,7 +93,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                     <strong className="text-white">
                       {formatPrice(amountNeededForFreeShipping, currentCurrency)}
                     </strong>{' '}
-                    de plus pour bénéficier de la Livraison Express Gratuite
+                    de plus pour bénéficier de la Livraison Express Gratuite au Maroc
                   </span>
                 )}
               </div>

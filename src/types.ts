@@ -85,6 +85,8 @@ export interface CustomerReview {
   productPurchased: string;
   verified: boolean;
   avatarUrl?: string;
+  role?: string;
+  company?: string;
 }
 
 export interface InstagramPost {

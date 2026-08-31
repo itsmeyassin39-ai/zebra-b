@@ -246,7 +246,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
               {/* Guarantees */}
               <div className="flex items-center justify-between text-[10px] text-zinc-400 pt-1">
                 <span className="flex items-center gap-1">
-                  <Truck className="w-3 h-3 text-zinc-300" /> Livraison Express Offerte
+                  <Truck className="w-3 h-3 text-zinc-300" /> Livraison Express offerte au Maroc
                 </span>
                 <span className="flex items-center gap-1">
                   <ShieldCheck className="w-3 h-3 text-zinc-300" /> Garantie à Vie

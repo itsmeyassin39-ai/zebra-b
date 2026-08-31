@@ -8,7 +8,7 @@ import webpush from 'web-push';
 import { openDb, generateToken } from './db';
 import type { Db } from './db';
 import { PRODUCTS, CATEGORIES, INSTAGRAM_POSTS } from '../src/data/products';
-import type { Product, CategoryInfo, InstagramPost, ProductColor, Order, OrderCustomer } from '../src/types';
+import type { Product, CategoryInfo, InstagramPost, ProductColor, Order, OrderCustomer, CustomerReview } from '../src/types';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, '..');
@@ -95,6 +95,21 @@ const DDL = [
     product_tagged_name TEXT NOT NULL DEFAULT '',
     product_tagged_price REAL NOT NULL DEFAULT 0,
     product_id TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`,
+  `CREATE TABLE IF NOT EXISTS customer_reviews (
+    id TEXT PRIMARY KEY,
+    author TEXT NOT NULL DEFAULT '',
+    location TEXT NOT NULL DEFAULT '',
+    rating INTEGER NOT NULL DEFAULT 5,
+    date TEXT NOT NULL DEFAULT '',
+    title TEXT NOT NULL DEFAULT '',
+    comment TEXT NOT NULL DEFAULT '',
+    product_purchased TEXT NOT NULL DEFAULT '',
+    verified INTEGER NOT NULL DEFAULT 1,
+    avatar_url TEXT NOT NULL DEFAULT '',
+    role TEXT NOT NULL DEFAULT '',
+    company TEXT NOT NULL DEFAULT '',
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   )`,
   `CREATE TABLE IF NOT EXISTS admin_credentials (
@@ -267,6 +282,26 @@ function postRow(p: InstagramPost): { sql: string; args: SqlArgs } {
   };
 }
 
+function reviewRow(r: CustomerReview): { sql: string; args: SqlArgs } {
+  return {
+    sql: 'INSERT OR REPLACE INTO customer_reviews (id, author, location, rating, date, title, comment, product_purchased, verified, avatar_url, role, company) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    args: [
+      r.id,
+      r.author,
+      r.location,
+      r.rating,
+      r.date,
+      r.title,
+      r.comment,
+      r.productPurchased,
+      r.verified ? 1 : 0,
+      r.avatarUrl ?? '',
+      r.role ?? '',
+      r.company ?? '',
+    ],
+  };
+}
+
 function rowToOrder(row: Record<string, any>): Order {
   return {
     id: row.id,
@@ -316,12 +351,14 @@ const ORDER_STATUSES = ['nouvelle', 'en_cours', 'expediee', 'livree'];
 const selectProducts = 'SELECT * FROM products ORDER BY created_at DESC, rowid DESC';
 const selectCategories = 'SELECT * FROM categories';
 const selectPosts = 'SELECT * FROM instagram_posts';
+const selectReviews = 'SELECT * FROM customer_reviews ORDER BY created_at DESC, rowid DESC';
 
-async function fetchAll(): Promise<{ products: Product[]; categories: CategoryInfo[]; instagramPosts: InstagramPost[] }> {
-  const [productsRes, categoriesRes, postsRes] = await Promise.all([
+async function fetchAll(): Promise<{ products: Product[]; categories: CategoryInfo[]; instagramPosts: InstagramPost[]; customerReviews: CustomerReview[] }> {
+  const [productsRes, categoriesRes, postsRes, reviewsRes] = await Promise.all([
     db.all(selectProducts, []),
     db.all(selectCategories, []),
     db.all(selectPosts, []),
+    db.all(selectReviews, []),
   ]);
   return {
     products: productsRes.map((r) => rowToProduct(r)),
@@ -343,6 +380,20 @@ async function fetchAll(): Promise<{ products: Product[]; categories: CategoryIn
       productTaggedName: String(r.product_tagged_name),
       productTaggedPrice: Number(r.product_tagged_price),
       productId: String(r.product_id),
+    })),
+    customerReviews: reviewsRes.map((r) => ({
+      id: String(r.id),
+      author: String(r.author),
+      location: String(r.location),
+      rating: Number(r.rating),
+      date: String(r.date),
+      title: String(r.title),
+      comment: String(r.comment),
+      productPurchased: String(r.product_purchased),
+      verified: !!r.verified,
+      avatarUrl: (r.avatar_url as string) || undefined,
+      role: (r.role as string) || undefined,
+      company: (r.company as string) || undefined,
     })),
   };
 }
@@ -672,9 +723,54 @@ app.delete('/api/posts/:id', requireAuth(async (req, res) => {
   res.json({ id: req.params.id });
 }));
 
+// Customer reviews
+app.post('/api/reviews', requireAuth(async (req, res) => {
+  const r = req.body as CustomerReview;
+  if (!r || !r.id || !r.author) {
+    res.status(400).json({ error: 'Avis invalide.' });
+    return;
+  }
+  const row = reviewRow(r);
+  await db.run(row.sql, row.args);
+  res.json(r);
+}));
+
+app.put('/api/reviews/:id', requireAuth(async (req, res) => {
+  const id = req.params.id;
+  const existing = await db.all('SELECT * FROM customer_reviews WHERE id = ?', [id]);
+  if (existing.length === 0) {
+    res.status(404).json({ error: 'Avis introuvable.' });
+    return;
+  }
+  const cur = existing[0];
+  const patch = req.body as Partial<CustomerReview>;
+  const next: CustomerReview = {
+    id,
+    author: patch.author ?? (cur.author as string),
+    location: patch.location ?? (cur.location as string),
+    rating: patch.rating ?? Number(cur.rating),
+    date: patch.date ?? (cur.date as string),
+    title: patch.title ?? (cur.title as string),
+    comment: patch.comment ?? (cur.comment as string),
+    productPurchased: patch.productPurchased ?? (cur.product_purchased as string),
+    verified: patch.verified ?? !!cur.verified,
+    avatarUrl: patch.avatarUrl ?? ((cur.avatar_url as string) || undefined),
+    role: patch.role !== undefined ? patch.role : ((cur.role as string) || undefined),
+    company: patch.company !== undefined ? patch.company : ((cur.company as string) || undefined),
+  };
+  const row = reviewRow(next);
+  await db.run(row.sql, row.args);
+  res.json(next);
+}));
+
+app.delete('/api/reviews/:id', requireAuth(async (req, res) => {
+  await db.run('DELETE FROM customer_reviews WHERE id = ?', [req.params.id]);
+  res.json({ id: req.params.id });
+}));
+
 // Bulk import (replace everything) & reset
 app.post('/api/import', requireAuth(async (req, res) => {
-  const { products, categories, instagramPosts } = req.body as any;
+  const { products, categories, instagramPosts, customerReviews } = req.body as any;
   if (
     !Array.isArray(products) ||
     !Array.isArray(categories) ||
@@ -683,10 +779,12 @@ app.post('/api/import', requireAuth(async (req, res) => {
     res.status(400).json({ error: 'Fichier de sauvegarde invalide.' });
     return;
   }
+  const reviews: CustomerReview[] = Array.isArray(customerReviews) ? customerReviews : [];
   await db.transaction(async (tx) => {
     await tx.run('DELETE FROM products', []);
     await tx.run('DELETE FROM categories', []);
     await tx.run('DELETE FROM instagram_posts', []);
+    await tx.run('DELETE FROM customer_reviews', []);
     for (const p of products as Product[]) {
       const row = productRow(p);
       await tx.run(row.sql, row.args);
@@ -699,6 +797,10 @@ app.post('/api/import', requireAuth(async (req, res) => {
       const row = postRow(p);
       await tx.run(row.sql, row.args);
     }
+    for (const r of reviews) {
+      const row = reviewRow(r);
+      await tx.run(row.sql, row.args);
+    }
   });
   res.json(await fetchAll());
 }));
@@ -708,6 +810,7 @@ app.post('/api/reset', requireAuth(async (_req, res) => {
     await tx.run('DELETE FROM products', []);
     await tx.run('DELETE FROM categories', []);
     await tx.run('DELETE FROM instagram_posts', []);
+    await tx.run('DELETE FROM customer_reviews', []);
   });
   await seed();
   res.json(await fetchAll());
@@ -1022,6 +1125,16 @@ async function boot() {
   try {
     db = await openDb();
     await db.exec(DDL.join(';\n'));
+    try {
+      await db.run("ALTER TABLE customer_reviews ADD COLUMN role TEXT NOT NULL DEFAULT ''", []);
+    } catch {
+      // Column may already exist
+    }
+    try {
+      await db.run("ALTER TABLE customer_reviews ADD COLUMN company TEXT NOT NULL DEFAULT ''", []);
+    } catch {
+      // Column may already exist
+    }
     await seed();
   } catch (err) {
     console.error(

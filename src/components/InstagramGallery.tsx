@@ -107,7 +107,7 @@ export const InstagramGallery: React.FC<InstagramGalleryProps> = ({
               <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-600">{fmt(totalComments)} commentaires</span>
             </div>
             <a
-              href="https://www.instagram.com"
+              href="https://www.instagram.com/zebrabags.officiel/"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 bg-zinc-950 text-white rounded-full px-4 py-2.5 shadow-sm hover:bg-zinc-800 transition-colors cursor-pointer"
@@ -145,10 +145,15 @@ export const InstagramGallery: React.FC<InstagramGalleryProps> = ({
             <p className="text-xs text-zinc-400 leading-relaxed max-w-xs font-light">
               Le mois prochain, votre look pourrait être notre prochaine couverture. Montrez-nous votre côté sauvage.
             </p>
-            <div className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-white bg-white px-5 py-2.5 rounded-full font-bold shadow hover:bg-zinc-200 transition-colors cursor-pointer">
+            <a
+              href="https://www.instagram.com/zebrabags.officiel/"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-zinc-950 bg-[#e6c987] px-5 py-2.5 rounded-full font-bold shadow-lg hover:bg-[#f2dcaa] transition-colors cursor-pointer"
+            >
               Partager mon look
               <ArrowUpRight className="w-3.5 h-3.5" />
-            </div>
+            </a>
           </div>
         </div>
         )}

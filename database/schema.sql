@@ -81,6 +81,25 @@ CREATE TABLE IF NOT EXISTS instagram_posts (
 );
 
 -- ---------------------------------------------------------------------
+-- AVIS CLIENTS
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS customer_reviews (
+  id                TEXT PRIMARY KEY,
+  author            TEXT NOT NULL DEFAULT '',
+  location          TEXT NOT NULL DEFAULT '',
+  rating            INTEGER NOT NULL DEFAULT 5,
+  date              TEXT NOT NULL DEFAULT '',
+  title             TEXT NOT NULL DEFAULT '',
+  comment           TEXT NOT NULL DEFAULT '',
+  product_purchased TEXT NOT NULL DEFAULT '',
+  verified          INTEGER NOT NULL DEFAULT 1,
+  avatar_url        TEXT NOT NULL DEFAULT '',
+  role              TEXT NOT NULL DEFAULT '',
+  company           TEXT NOT NULL DEFAULT '',
+  created_at        TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- ---------------------------------------------------------------------
 -- ADMIN (une seule ligne, id = 1)
 -- ---------------------------------------------------------------------
 -- password_hash = hash scrypt défini par le serveur : "$salt$hexHash"
@@ -126,5 +145,6 @@ CREATE INDEX IF NOT EXISTS idx_products_category   ON products(category);
 CREATE INDEX IF NOT EXISTS idx_products_is_new     ON products(is_new);
 CREATE INDEX IF NOT EXISTS idx_products_best_seller ON products(is_best_seller);
 CREATE INDEX IF NOT EXISTS idx_posts_product_id    ON instagram_posts(product_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_created     ON customer_reviews(created_at);
 CREATE INDEX IF NOT EXISTS idx_sessions_token      ON sessions(token);
 CREATE INDEX IF NOT EXISTS idx_orders_created       ON orders(created_at);
