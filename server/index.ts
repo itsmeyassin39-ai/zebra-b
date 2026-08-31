@@ -745,13 +745,16 @@ async function pushToAll(payload: Record<string, unknown>): Promise<number> {
 }
 
 async function sendOrderPushNotification(order: Order): Promise<void> {
+  const title = `Nouvelle commande ${order.id}`;
+  const body = `${order.customer.firstName} ${order.customer.lastName} — ${order.total} ${order.currency}`;
+
   await pushToAll({
     type: 'order',
-    title: `Nouvelle commande ${order.id}`,
-    body: `${order.customer.firstName} ${order.customer.lastName} — ${order.total} ${order.currency}`,
+    title,
+    body,
     orderId: order.id,
     url: '/#/dashboard',
-  });
+  }).catch((e) => console.error('Web push error:', e));
 }
 
 app.get('/api/events', async (req, res, next) => {
