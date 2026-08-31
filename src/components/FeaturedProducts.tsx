@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, Eye, ShoppingBag, Check, Sparkles, Filter } from 'lucide-react';
+import { Heart, ShoppingBag, Check } from 'lucide-react';
 import { Product, Currency } from '../types';
 import { useStore } from '../store/StoreContext';
 import { formatPrice } from '../utils/formatters';
@@ -149,12 +149,13 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
               const isWishlisted = wishlistIds.includes(product.id);
               const isAdded = addedAnimationId === product.id;
               const isHovered = hoveredProduct === product.id;
+              const isOutOfStock = product.stockCount <= 0;
 
               return (
                 <div
                   key={product.id}
                   id={`product-card-${product.id}`}
-                  className="group relative bg-zinc-50 rounded-xl border border-zinc-200 hover:border-zinc-400 transition-all duration-300 flex flex-col justify-between overflow-hidden text-left shadow-sm hover:shadow-md"
+                  className="group relative bg-white rounded-2xl border border-zinc-100 hover:border-zinc-300 transition-all duration-300 flex flex-col justify-between overflow-hidden text-left shadow-sm hover:shadow-lg hover:shadow-zinc-200/50"
                   onMouseEnter={() => setHoveredProduct(product.id)}
                   onMouseLeave={() => setHoveredProduct(null)}
                 >
@@ -167,25 +168,6 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                       referrerPolicy="no-referrer"
                       className="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-700"
                     />
-
-                    {/* Badges on Top Left */}
-                    <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
-                      {product.isNew && (
-                        <span className="px-2.5 py-0.5 bg-black text-white text-[9px] font-bold tracking-widest uppercase rounded shadow-sm">
-                          Nouvelle Saison
-                        </span>
-                      )}
-                      {product.isBestSeller && (
-                        <span className="px-2.5 py-0.5 bg-white/95 text-zinc-900 border border-zinc-300 text-[9px] font-semibold tracking-widest uppercase rounded shadow-sm">
-                          Meilleure Vente
-                        </span>
-                      )}
-                      {product.isLimited && (
-                        <span className="px-2.5 py-0.5 bg-zinc-900 text-zinc-100 text-[9px] font-mono tracking-widest uppercase rounded shadow-sm">
-                          {product.stockCount} Restants
-                        </span>
-                      )}
-                    </div>
 
                     {/* Wishlist Heart Button on Top Right */}
                     <button
@@ -205,30 +187,24 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                       <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-white' : ''}`} />
                     </button>
 
-                    {/* Hover Quick Action Buttons */}
-                    <div className="absolute inset-x-3 bottom-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-200 z-10">
+                    {/* Hover Quick Action Button */}
+                    <div className="absolute inset-x-3 bottom-3 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-200 z-10">
                       <button
-                        id={`btn-quick-view-${product.id}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onQuickView(product);
-                        }}
-                        className="flex-1 py-2.5 bg-white/95 hover:bg-white text-zinc-900 text-[10px] tracking-widest font-bold uppercase rounded-lg border border-zinc-300 backdrop-blur-sm transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        Aperçu Rapide
-                      </button>
-
-                      <button
-                        id={`btn-quick-add-${product.id}`}
+                        disabled={isOutOfStock}
                         onClick={(e) => handleQuickAdd(e, product)}
-                        className={`flex-1 py-2.5 text-[10px] tracking-widest font-bold uppercase rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-md cursor-pointer ${
-                          isAdded
-                            ? 'bg-emerald-600 text-white'
-                            : 'bg-black text-white hover:bg-zinc-800'
+                        className={`w-full py-3 text-[11px] tracking-widest font-bold uppercase rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-lg ${
+                          isOutOfStock
+                            ? 'bg-zinc-200 text-zinc-500 cursor-not-allowed'
+                            : isAdded
+                              ? 'bg-emerald-600 text-white cursor-pointer'
+                              : 'bg-white/95 text-zinc-900 hover:bg-black hover:text-white cursor-pointer'
                         }`}
                       >
-                        {isAdded ? (
+                        {isOutOfStock ? (
+                          <>
+                            Out Of Stock
+                          </>
+                        ) : isAdded ? (
                           <>
                             <Check className="w-3.5 h-3.5" />
                             Ajouté !
@@ -241,37 +217,59 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                         )}
                       </button>
                     </div>
+
+                    {/* Out of Stock overlay */}
+                    {isOutOfStock && (
+                      <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] z-[5] flex items-center justify-center pointer-events-none">
+                        <span className="px-3 py-1.5 bg-zinc-900 text-white text-[10px] font-bold tracking-[0.2em] uppercase rounded-full shadow-lg">
+                          Out Of Stock
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Card Bottom: Product Info */}
-                  <div className="p-4 sm:p-5 flex flex-col justify-between flex-1 space-y-3">
-                    <div>
-                      {/* Category and Rating */}
-                      <div className="flex items-center justify-between text-[11px] text-zinc-500 font-mono mb-1.5">
-                        <span className="uppercase tracking-wider font-medium">{product.categoryName}</span>
-                        <div className="flex items-center gap-1 text-zinc-700 font-medium">
-                          <span>★</span>
-                          <span>{product.rating}</span>
-                          <span className="text-zinc-400">({product.reviewsCount})</span>
-                        </div>
+                  <div className="p-4 flex flex-col gap-2.5">
+                    {/* Badges */}
+                    {(product.isNew || product.isBestSeller || product.isLimited || isOutOfStock) && (
+                      <div className="flex items-center gap-1.5">
+                        {isOutOfStock && (
+                          <span className="px-2 py-0.5 bg-red-50 text-red-700 border border-red-200 text-[9px] font-semibold tracking-widest uppercase rounded-full">
+                            Out Of Stock
+                          </span>
+                        )}
+                        {!isOutOfStock && product.isNew && (
+                          <span className="px-2 py-0.5 bg-zinc-900 text-white text-[9px] font-semibold tracking-widest uppercase rounded-full">
+                            Nouveau
+                          </span>
+                        )}
+                        {!isOutOfStock && product.isBestSeller && (
+                          <span className="px-2 py-0.5 bg-white text-zinc-900 border border-zinc-300 text-[9px] font-semibold tracking-widest uppercase rounded-full">
+                            Best Seller
+                          </span>
+                        )}
+                        {!isOutOfStock && product.isLimited && (
+                          <span className="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 text-[9px] font-semibold tracking-widest uppercase rounded-full">
+                            {product.stockCount} restants
+                          </span>
+                        )}
                       </div>
+                    )}
 
-                      {/* Product Name */}
+                    <div className="flex-1">
+                      <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-zinc-400">
+                        {product.categoryName}
+                      </span>
                       <h3
                         onClick={() => onQuickView(product)}
-                        className="font-bold text-sm sm:text-base text-zinc-900 tracking-wide hover:text-amber-700 transition-colors cursor-pointer line-clamp-1"
+                        className="mt-1 font-display font-bold text-base text-zinc-900 leading-snug hover:text-amber-700 transition-colors cursor-pointer line-clamp-1"
                       >
                         {product.name}
                       </h3>
-
-                      {/* Tagline / Subtitle */}
-                      <p className="text-xs text-zinc-600 font-light line-clamp-1 mt-0.5">
-                        {product.tagline}
-                      </p>
                     </div>
 
                     {/* Price */}
-                    <div className="pt-2 border-t border-zinc-200 flex items-center gap-1.5">
+                    <div className="flex items-baseline gap-2">
                       {product.originalPrice && (
                         <span className="text-xs text-zinc-400 line-through font-mono">
                           {formatPrice(product.originalPrice, currentCurrency)}
@@ -281,7 +279,6 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                         {formatPrice(product.price, currentCurrency)}
                       </span>
                     </div>
-
                   </div>
                 </div>
               );
