@@ -32,7 +32,7 @@ const PUSHY_SECRET_KEY = process.env.PUSHY_SECRET_KEY?.trim() || '';
 // ----- ntfy (app Play Store "ntfy") -----
 // Topic secret utilisé par l'app ntfy sur votre téléphone. Choisissez un nom
 // long et aléatoire (ex. zebra-orders-Kx9f2m) pour éviter que des tiers y lisent.
-const NTFY_TOPIC = process.env.NTFY_TOPIC?.trim() || 'zebra-orders';
+const NTFY_TOPIC = process.env.NTFY_TOPIC?.trim() || 'zebrano-kalamano53628';
 
 let db: Db;
 
