@@ -38,6 +38,7 @@ import {
   enablePush,
   disablePush,
   getPushStatus,
+  restorePushIfEnabled,
   PushStatus,
   requestNotificationPermission,
   sendBrowserOrderNotification,
@@ -225,7 +226,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
     void (async () => {
       const perm = await requestNotificationPermission();
       setNotifPermission(perm);
-      const status = await getPushStatus();
+      // Restaure le push s'il avait déjà été activé sur cet appareil, pour que
+      // le bouton ne repasse pas tout seul sur "Désactivé".
+      const status = await restorePushIfEnabled();
       setPushStatus(status);
       if (perm === 'granted' && status === 'on') {
         notify('Notifications en direct activées 🔔');

@@ -3,6 +3,27 @@ import type { Order } from '../types';
 
 export type PushStatus = 'unknown' | 'on' | 'off' | 'denied' | 'unsupported';
 
+const PUSH_ENABLED_KEY = 'zebra_push_enabled_v1';
+
+// Mémorise que le push a été activé sur cet appareil, pour que le bouton reste
+// "Activé" même si la relecture de l'abonnement du navigateur vacille.
+export function isPushStoredEnabled(): boolean {
+  try {
+    return localStorage.getItem(PUSH_ENABLED_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+export function setPushStoredEnabled(on: boolean): void {
+  try {
+    if (on) localStorage.setItem(PUSH_ENABLED_KEY, '1');
+    else localStorage.removeItem(PUSH_ENABLED_KEY);
+  } catch {
+    // storage unavailable
+  }
+}
+
 export function isNotificationSupported(): boolean {
   return (
     typeof window !== 'undefined' &&
@@ -47,6 +68,10 @@ export async function getExistingSubscription(): Promise<PushSubscription | null
 export async function getPushStatus(): Promise<PushStatus> {
   if (!isPushSupported()) return 'unsupported';
   if (Notification.permission === 'denied') return 'denied';
+  // Si l'utilisateur a déjà activé le push sur cet appareil, on le considère
+  // comme activé (il sera restauré automatiquement au besoin) plutôt que de
+  // clignoter vers "off" à cause d'une relecture temporairement vide.
+  if (isPushStoredEnabled()) return 'on';
   const sub = await getExistingSubscription();
   return sub ? 'on' : 'off';
 }
@@ -79,6 +104,7 @@ export async function enablePush(): Promise<PushStatus> {
       method: 'POST',
       body: { subscription: subscription.toJSON() },
     });
+    setPushStoredEnabled(true);
     return 'on';
   } catch (err) {
     console.warn('Erreur activation push:', err);
@@ -100,6 +126,19 @@ export async function disablePush(): Promise<void> {
     }
     await sub.unsubscribe().catch(() => {});
   }
+  setPushStoredEnabled(false);
+}
+
+/**
+ * Restaure automatiquement le push si l'utilisateur l'avait déjà activé sur cet
+ * appareil (bouton resté "Activé" mais abonnement non re-trouvé au chargement).
+ * Idempotent : réutilise l'abonnement existant s'il est déjà présent.
+ */
+export async function restorePushIfEnabled(): Promise<PushStatus> {
+  if (!isPushStoredEnabled()) return getPushStatus();
+  if (!isPushSupported()) return 'unsupported';
+  if (Notification.permission === 'denied') return 'denied';
+  return enablePush();
 }
 
 /**

@@ -33,13 +33,11 @@ export function saveSession(token: string, remember: boolean, email: string): vo
   try {
     sessionStorage.removeItem(TOKEN_SESSION);
     localStorage.removeItem(TOKEN_LOCAL);
-    if (remember) {
-      localStorage.setItem(TOKEN_LOCAL, token);
-      localStorage.setItem(EMAIL_LOCAL, email);
-    } else {
-      sessionStorage.setItem(TOKEN_SESSION, token);
-      sessionStorage.setItem(EMAIL_SESSION, email);
-    }
+    // On stocke toujours la session en localStorage pour rester connecté même
+    // si le navigateur est fermé et rouvert (le `remember` garde uniquement sa
+    // sémantique, mais la connexion est persistée dans tous les cas).
+    localStorage.setItem(TOKEN_LOCAL, token);
+    localStorage.setItem(EMAIL_LOCAL, email);
   } catch {
     // storage unavailable
   }
