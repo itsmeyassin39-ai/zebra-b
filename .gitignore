@@ -6,3 +6,11 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# SQLite local database (Railway uses Turso cloud; don't commit local DB files)
+data.db
+data.db-shm
+data.db-wal
+
+# Bun lockfile (project uses npm / package-lock.json)
+bun.lock
