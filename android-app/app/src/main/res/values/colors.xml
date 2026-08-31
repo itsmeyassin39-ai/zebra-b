@@ -1,0 +1,7 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+    <color name="zebra_dark">#FF0C0C0D</color>
+    <color name="zebra_light">#FFE4E4E7</color>
+    <color name="ic_launcher_background">#FF0C0C0D</color>
+</resources>

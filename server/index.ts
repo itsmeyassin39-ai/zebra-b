@@ -24,6 +24,16 @@ if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
   webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
 }
 
+// ----- Pushy (App Android native "Zebra Bags - Commandes") -----
+// Clé secrète Pushy pour envoyer les notifications vers l'app Android,
+// même quand l'app / Chrome est fermé (téléphone allumé).
+const PUSHY_SECRET_KEY = process.env.PUSHY_SECRET_KEY?.trim() || '';
+
+// ----- ntfy (app Play Store "ntfy") -----
+// Topic secret utilisé par l'app ntfy sur votre téléphone. Choisissez un nom
+// long et aléatoire (ex. zebra-orders-Kx9f2m) pour éviter que des tiers y lisent.
+const NTFY_TOPIC = process.env.NTFY_TOPIC?.trim() || 'zebra-orders';
+
 let db: Db;
 
 // =====================================================================
@@ -99,6 +109,11 @@ const DDL = [
   `CREATE TABLE IF NOT EXISTS push_subscriptions (
     endpoint TEXT PRIMARY KEY,
     sub_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`,
+  `CREATE TABLE IF NOT EXISTS pushy_tokens (
+    token TEXT PRIMARY KEY,
+    platform TEXT NOT NULL DEFAULT 'android',
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   )`,
   `CREATE TABLE IF NOT EXISTS orders (
@@ -755,6 +770,53 @@ async function sendOrderPushNotification(order: Order): Promise<void> {
     orderId: order.id,
     url: '/#/dashboard',
   }).catch((e) => console.error('Web push error:', e));
+
+  // App Android native (Pushy) : fiable même app/Chrome fermé (téléphone allumé)
+  if (PUSHY_SECRET_KEY) {
+    const rows = await db.all('SELECT token FROM pushy_tokens', []);
+    const tokens = rows.map((r) => String(r.token));
+    if (tokens.length > 0) {
+      await sendPushyToAll(tokens, title, body, { orderId: order.id, url: '/#/dashboard' })
+        .catch((e) => console.error('Pushy error:', e));
+    }
+  }
+
+  // App Play Store "ntfy" : notification même app/Chrome fermé (téléphone allumé)
+  await sendNtfyNotification(title, body).catch((e) => console.error('ntfy error:', e));
+}
+
+// Envoie une notification via l'app ntfy (topic public ntfy.sh ou auto-hébergé).
+async function sendNtfyNotification(title: string, body: string): Promise<void> {
+  const res = await fetch(`https://ntfy.sh/${encodeURIComponent(NTFY_TOPIC)}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: `${title}\n${body}`,
+  });
+  if (!res.ok) {
+    console.error('ntfy response', res.status, (await res.text()).slice(0, 200));
+  }
+}
+
+// Envoie une notification Pushy à chaque token d'appareil Android enregistré.
+async function sendPushyToAll(
+  tokens: string[],
+  title: string,
+  body: string,
+  data: Record<string, unknown>
+): Promise<number> {
+  const res = await fetch(`https://api.pushy.me/push?api_key=${encodeURIComponent(PUSHY_SECRET_KEY)}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      to: tokens,
+      data: { title, body, ...data },
+      notification: { title, body },
+    }),
+  });
+  if (!res.ok) {
+    console.error('Pushy API response', res.status, (await res.text()).slice(0, 300));
+  }
+  return tokens.length;
 }
 
 app.get('/api/events', async (req, res, next) => {
@@ -838,6 +900,30 @@ app.delete('/api/push/subscribe', requireAuth(async (req, res) => {
     return;
   }
   await db.run('DELETE FROM push_subscriptions WHERE endpoint = ?', [endpoint]);
+  res.json({ ok: true });
+}));
+
+// ----- App Android native (Pushy) : enregistrement d'un appareil -----
+app.post('/api/pushy/register', requireAuth(async (req, res) => {
+  const token = String((req.body as any)?.token ?? '').trim();
+  if (!token) {
+    res.status(400).json({ error: 'Token manquant.' });
+    return;
+  }
+  await db.run('INSERT OR REPLACE INTO pushy_tokens (token, platform) VALUES (?, ?)', [
+    token,
+    String((req.body as any)?.platform ?? 'android'),
+  ]);
+  res.json({ ok: true });
+}));
+
+app.delete('/api/pushy/register', requireAuth(async (req, res) => {
+  const token = String((req.body as any)?.token ?? '').trim();
+  if (!token) {
+    res.status(400).json({ error: 'Token manquant.' });
+    return;
+  }
+  await db.run('DELETE FROM pushy_tokens WHERE token = ?', [token]);
   res.json({ ok: true });
 }));
 
