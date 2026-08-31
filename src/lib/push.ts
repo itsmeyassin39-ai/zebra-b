@@ -82,7 +82,11 @@ export async function enablePush(): Promise<PushStatus> {
     return 'on';
   } catch (err) {
     console.warn('Erreur activation push:', err);
-    return 'on'; // Permission accordée pour notifications locales
+    // Ne PAS prétendre que le push est activé en cas d'échec : si
+    // l'abonnement n'a pas pu être enregistré côté serveur, aucune
+    // notification n'arrivera sur le téléphone. On retourne 'off' pour
+    // que l'interface reflète réellement l'état et permette de réessayer.
+    return 'off';
   }
 }
 
@@ -104,26 +108,29 @@ export async function disablePush(): Promise<void> {
  */
 export async function requestNotificationPermission(): Promise<NotificationPermission | 'unsupported'> {
   if (!isNotificationSupported()) return 'unsupported';
-  
-  if (Notification.permission === 'granted') {
-    void enablePush();
-    return 'granted';
-  }
 
   if (Notification.permission === 'denied') {
     return 'denied';
   }
 
-  try {
-    const perm = await Notification.requestPermission();
-    if (perm === 'granted') {
-      void enablePush();
+  if (Notification.permission !== 'granted') {
+    try {
+      const perm = await Notification.requestPermission();
+      if (perm !== 'granted') return perm;
+    } catch (e) {
+      console.error('Erreur demande de permission notification:', e);
+      return Notification.permission;
     }
-    return perm;
-  } catch (e) {
-    console.error('Erreur demande de permission notification:', e);
-    return Notification.permission;
   }
+
+  // Permission accordée : on enregistre l'abonnement push (téléphone /
+  // arrière-plan). On attend réellement le résultat pour que l'interface
+  // reflète si le push est opérationnel ou non.
+  const status = await enablePush();
+  if (status !== 'on') {
+    console.warn('Push non enregistré (statut final :', status, ')');
+  }
+  return 'granted';
 }
 
 /**

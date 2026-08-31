@@ -227,8 +227,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
       setNotifPermission(perm);
       const status = await getPushStatus();
       setPushStatus(status);
-      if (perm === 'granted') {
+      if (perm === 'granted' && status === 'on') {
         notify('Notifications en direct activées 🔔');
+      } else if (perm === 'granted' && status !== 'on') {
+        notify('Permission accordée, mais le push téléphone n\'a pas pu être activé.');
       }
     })();
   }, []);
@@ -253,10 +255,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
       setNotifPermission(perm);
       const status = await getPushStatus();
       setPushStatus(status);
-      if (perm === 'granted') {
+      if (perm === 'granted' && status === 'on') {
         playNewOrderChime();
         testOrderNotification();
         notify('Notifications autorisées et activées avec succès ! 🔔');
+      } else if (perm === 'granted' && status !== 'on') {
+        notify('Permission accordée, mais le push téléphone n\'a pas pu être activé.');
       } else if (perm === 'denied') {
         notify('Notifications bloquées par votre navigateur.');
       }
