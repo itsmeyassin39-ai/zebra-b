@@ -120,8 +120,8 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between pt-2 border-t border-zinc-800/60 mt-2">
-                      <span className="text-xs font-bold text-white font-mono">
+                    <div className="flex items-center justify-between gap-2 pt-2 border-t border-zinc-800/60 mt-2">
+                      <span className="text-xs font-bold text-white font-mono shrink-0">
                         {formatPrice(product.price, currentCurrency)}
                       </span>
 
@@ -130,10 +130,10 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
                           onMoveToCart(product);
                           onRemoveFromWishlist(product.id);
                         }}
-                        className="px-3 py-1.5 bg-white text-black hover:bg-zinc-200 text-[10px] tracking-wider uppercase font-bold rounded flex items-center gap-1 cursor-pointer"
+                        className="px-2.5 sm:px-3 py-1.5 bg-white text-black hover:bg-zinc-200 text-[10px] tracking-wider uppercase font-bold rounded flex items-center gap-1 cursor-pointer whitespace-nowrap min-w-0"
                       >
-                        <ShoppingBag className="w-3 h-3" />
-                        <span>Déplacer au Panier</span>
+                        <ShoppingBag className="w-3 h-3 shrink-0" />
+                        <span className="truncate">Déplacer au Panier</span>
                       </button>
                     </div>
                   </div>

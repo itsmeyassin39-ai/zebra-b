@@ -64,7 +64,7 @@ export const AboutBrand: React.FC = () => {
             </div>
 
             {/* Interactive Tab Selectors */}
-            <div className="flex items-center gap-3 border-b border-zinc-200 pb-4">
+            <div className="flex items-center gap-3 border-b border-zinc-200 pb-4 overflow-x-auto scrollbar-none whitespace-nowrap">
               {[
                 { id: 'philosophy', label: 'Philosophie' },
                 { id: 'craft', label: 'Artisanat Toscan' },

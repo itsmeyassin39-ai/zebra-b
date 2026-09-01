@@ -37,7 +37,6 @@ export const SearchModal: React.FC<SearchModalProps> = ({
       (p) =>
         p.name.toLowerCase().includes(q) ||
         p.categoryName.toLowerCase().includes(q) ||
-        p.description.toLowerCase().includes(q) ||
         p.material.toLowerCase().includes(q) ||
         p.zebraAccentStyle.toLowerCase().includes(q)
     );
@@ -165,7 +164,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                 <span className="text-xs text-zinc-400 font-mono uppercase tracking-widest block">
                   Recommandations Signature
                 </span>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 min-[400px]:grid-cols-2 gap-3">
                   {products.slice(0, 2).map((prod) => (
                     <div
                       key={prod.id}

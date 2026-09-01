@@ -2,12 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { AnnouncementBar } from './components/AnnouncementBar';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
-import { BentoFeaturesSection } from './components/BentoFeaturesSection';
 
 import { FeaturedProducts } from './components/FeaturedProducts';
-import { MostSellersSection } from './components/MostSellersSection';
-import { ClientReviewsSection } from './components/ClientReviewsSection';
-import { InstagramGallery } from './components/InstagramGallery';
 import { Footer } from './components/Footer';
 
 import { CartDrawer } from './components/CartDrawer';
@@ -20,6 +16,8 @@ import { Product, Currency, CartItem } from './types';
 import { useStore } from './store/StoreContext';
 import AuthGate from './components/AuthGate';
 import Dashboard from './pages/Dashboard';
+import TrackOrder from './pages/TrackOrder';
+import { CategoryPage } from './pages/CategoryPage';
 
 export default function App() {
   const { products, loading, error, refresh } = useStore();
@@ -215,6 +213,15 @@ export default function App() {
     );
   }
 
+  if (route.startsWith('#/track')) {
+    return (
+      <TrackOrder onClose={() => { window.location.hash = ''; }} />
+    );
+  }
+
+  const categoryMatch = route.match(/^#\/category\/([^/]+)/);
+  const categoryId = categoryMatch ? decodeURIComponent(categoryMatch[1]) : null;
+
   return (
     <div className="min-h-screen bg-white text-zinc-900 flex flex-col font-sans selection:bg-amber-400 selection:text-black">
 
@@ -241,54 +248,47 @@ export default function App() {
         />
       </div>
 
-      {/* 3. Hero Section */}
-      <Hero
-        currentCurrency={currentCurrency}
-        onShopClick={() => handleNavigateSection('shop-section')}
-        onQuickView={(prod) => setQuickViewProduct(prod)}
-        onAddToCart={(prod) => handleAddToCart(prod)}
-      />
+      {categoryId ? (
+        <CategoryPage
+          categoryId={categoryId}
+          currentCurrency={currentCurrency}
+          wishlistIds={wishlistIds}
+          onQuickView={(prod) => setQuickViewProduct(prod)}
+          onAddToCart={(prod, colorIdx) => handleAddToCart(prod, colorIdx)}
+          onToggleWishlist={handleToggleWishlist}
+          onHome={() => { window.location.hash = ''; }}
+        />
+      ) : (
+        <>
+          {/* 3. Hero Section */}
+          <Hero
+            currentCurrency={currentCurrency}
+            onShopClick={() => handleNavigateSection('shop-section')}
+            onQuickView={(prod) => setQuickViewProduct(prod)}
+            onAddToCart={(prod) => handleAddToCart(prod)}
+          />
 
-      {/* 4. Features Section (Asymmetrical Bento Grid) */}
-      <BentoFeaturesSection />
+          {/* 7. Featured Products Section with Tabs & Filters */}
+          <FeaturedProducts
+            activeCategory={activeCategory}
+            currentCurrency={currentCurrency}
+            wishlistIds={wishlistIds}
+            onSelectCategory={setActiveCategory}
+            onQuickView={(prod) => setQuickViewProduct(prod)}
+            onAddToCart={(prod, colorIdx) => handleAddToCart(prod, colorIdx)}
+            onToggleWishlist={handleToggleWishlist}
+          />
 
-      {/* 6. Most Sellers Collection Section */}
-      <MostSellersSection
-        currentCurrency={currentCurrency}
-        wishlistIds={wishlistIds}
-        onQuickView={(prod) => setQuickViewProduct(prod)}
-        onAddToCart={(prod, colorIdx) => handleAddToCart(prod, colorIdx)}
-        onToggleWishlist={handleToggleWishlist}
-      />
-
-      {/* 7. Featured Products Section with Tabs & Filters */}
-      <FeaturedProducts
-        activeCategory={activeCategory}
-        currentCurrency={currentCurrency}
-        wishlistIds={wishlistIds}
-        onSelectCategory={setActiveCategory}
-        onQuickView={(prod) => setQuickViewProduct(prod)}
-        onAddToCart={(prod, colorIdx) => handleAddToCart(prod, colorIdx)}
-        onToggleWishlist={handleToggleWishlist}
-      />
-
-      {/* Client Reviews Section */}
-      <ClientReviewsSection />
-
-      {/* 11. Instagram / Community Social Media Gallery */}
-      <InstagramGallery
-        currentCurrency={currentCurrency}
-        onQuickView={(prod) => setQuickViewProduct(prod)}
-      />
-
-      {/* 13. Professional Luxury Footer */}
-      <Footer
-        onSelectCategory={(cat) => {
-          setActiveCategory(cat);
-          handleNavigateSection('shop-section');
-        }}
-        onNavigateSection={handleNavigateSection}
-      />
+          {/* 13. Professional Luxury Footer */}
+          <Footer
+            onSelectCategory={(cat) => {
+              setActiveCategory(cat);
+              handleNavigateSection('shop-section');
+            }}
+            onNavigateSection={handleNavigateSection}
+          />
+        </>
+      )}
 
       {/* Interactive Modals & Slide-out Drawers */}
       <CartDrawer

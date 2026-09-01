@@ -89,7 +89,7 @@ export const Hero: React.FC<HeroProps> = ({
       onMouseLeave={() => setIsAutoPlay(true)}
     >
       {/* Top spacing container to cleanly separate navbar from hero content */}
-      <div className="relative z-20 w-full max-w-[1600px] mx-auto px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-start pt-48 sm:pt-52 lg:pt-56 pb-20 lg:pb-28">
+      <div className="relative z-20 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 items-start pt-28 sm:pt-40 md:pt-48 lg:pt-56 pb-16 lg:pb-28">
 
         {/* LEFT COLUMN: Typography & CTAs */}
         <motion.div
@@ -139,8 +139,8 @@ export const Hero: React.FC<HeroProps> = ({
           </motion.div>
         </motion.div>
 
-        {/* CENTER COLUMN: Empty Center */}
-        <div className="lg:col-span-4 flex justify-center items-center relative z-0 min-h-[400px]">
+        {/* CENTER COLUMN: Empty Center — hidden below lg since the bag image was removed */}
+        <div className="hidden lg:flex lg:col-span-4 justify-center items-center relative z-0 min-h-[400px]">
           {/* Bag image removed as requested */}
         </div>
 
@@ -214,10 +214,6 @@ export const Hero: React.FC<HeroProps> = ({
                   ★ {activeProduct.rating} ({activeProduct.reviewsCount} avis)
                 </span>
               </div>
-
-              <p className="text-xs text-white/70 leading-relaxed font-light">
-                {activeProduct.description}
-              </p>
 
               {/* Real Craftsmanship & Material Meta */}
               <div className="pt-4 border-t border-white/10 grid grid-cols-2 gap-3 text-[10px] font-mono">

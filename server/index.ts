@@ -59,7 +59,6 @@ const DDL = [
     image_detail TEXT,
     image_lifestyle TEXT,
     colors_json TEXT NOT NULL DEFAULT '[]',
-    description TEXT NOT NULL DEFAULT '',
     details_json TEXT NOT NULL DEFAULT '[]',
     dimensions_json TEXT NOT NULL DEFAULT '{"width":30,"height":22,"depth":12,"unit":"cm"}',
     weight TEXT NOT NULL DEFAULT '',
@@ -201,7 +200,6 @@ function rowToProduct(row: Record<string, any>): Product {
       lifestyle: row.image_lifestyle || undefined,
     },
     colors: parseJson<ProductColor[]>(row.colors_json, []),
-    description: row.description,
     details: parseJson<string[]>(row.details_json, undefined),
     dimensions: parseJson(row.dimensions_json, { width: 30, height: 22, depth: 12, unit: 'cm' }),
     weight: row.weight,
@@ -220,10 +218,10 @@ function productRow(p: Product): { sql: string; args: SqlArgs } {
       id, name, tagline, category, category_name, price, original_price, rating,
       reviews_count, is_new, is_best_seller, is_limited, stock_count,
       image_main, image_hover, image_detail, image_lifestyle,
-      colors_json, description, details_json, dimensions_json, weight, material,
+      colors_json, details_json, dimensions_json, weight, material,
       lining, hardware, strap_drop, features_json, zebra_accent_style
     ) VALUES (
-      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
     )`,
     args: [
       p.id,
@@ -244,7 +242,6 @@ function productRow(p: Product): { sql: string; args: SqlArgs } {
       p.images.detail ?? null,
       p.images.lifestyle ?? null,
       JSON.stringify(p.colors),
-      p.description,
       JSON.stringify(p.details ?? []),
       JSON.stringify(p.dimensions),
       p.weight,
@@ -1081,11 +1078,29 @@ app.post('/api/orders', async (req, res, next) => {
   }
 });
 
+// Public order tracking (no auth) — a customer can look up their own order with its reference
+app.get('/api/orders/track', async (req, res, next) => {
+  try {
+    const reference = String(req.query.reference ?? '').trim().toUpperCase();
+    if (!reference) {
+      res.status(400).json({ error: 'Veuillez fournir votre référence de commande.' });
+      return;
+    }
+    const rows = await db.all('SELECT * FROM orders WHERE id = ? LIMIT 1', [reference]);
+    if (rows.length === 0) {
+      res.status(404).json({ error: 'Aucune commande trouvée avec cette référence.' });
+      return;
+    }
+    res.json(rowToOrder(rows[0]));
+  } catch (e) {
+    next(e);
+  }
+});
+
 app.get('/api/orders', requireAuth(async (_req, res) => {
   const rows = await db.all('SELECT * FROM orders ORDER BY created_at DESC, rowid DESC', []);
   res.json(rows.map((r) => rowToOrder(r)));
 }));
-
 app.put('/api/orders/:id', requireAuth(async (req, res) => {
   const status = String((req.body as any)?.status ?? '');
   if (!ORDER_STATUSES.includes(status)) {

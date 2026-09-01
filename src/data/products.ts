@@ -66,7 +66,6 @@ export const PRODUCTS: Product[] = [
       { name: 'Blanc Alabastre / Rayures Onyx', hex: '#f0ede6', previewUrl: 'https://images.unsplash.com/photo-1591561954557-26941169b49e?auto=format&fit=crop&w=400&q=80' },
       { name: 'Noir Ombre Pur', hex: '#050505', previewUrl: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=400&q=80' },
     ],
-    description: "L'emblème par excellence de la maison. Confectionné à la main en Toscane en cuir de veau italien foulonné au tannage végétal, le cabas Savanna associe des angles architecturaux tranchants à un soufflet accordéon organique imprimé à la main de notre motif zébré monochrome distinctif. Peut accueillir un ordinateur portable de 15 pouces avec une aisance remarquable.",
     details: [
       'Finitions de tranches peintes à la main et poignées cousues sellier',
       'Fermeture magnétique invisible sur le dessus avec fermoir pivotant finition palladium',
@@ -106,7 +105,6 @@ export const PRODUCTS: Product[] = [
       { name: 'Noir Onyx Mat', hex: '#0d0d0e', previewUrl: 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?auto=format&fit=crop&w=400&q=80' },
       { name: 'Blanc Glacier & Argent Ombré', hex: '#e8e8e8', previewUrl: 'https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=400&q=80' },
     ],
-    description: 'Une icône compacte sculptée pour le mouvement moderne. Le sac Equus présente un rabat avant somptueux incrusté de poil de veau texturé à motif zébré, encadré de cuir de veau lisse noir ultra-lisse et fixé par un fermoir tournant architectural inspiré des silhouettes sauvages.',
     details: [
       'Panneau avant en poil de veau organique texturé',
       'Détail de chaîne gourmette entrelacée avec la bandoulière en cuir',
@@ -143,7 +141,6 @@ export const PRODUCTS: Product[] = [
       { name: 'Noir Obsidienne & Zèbre Charbon', hex: '#18181b', previewUrl: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=400&q=80' },
       { name: 'Monochrome Haut Contraste', hex: '#27272a', previewUrl: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=400&q=80' },
     ],
-    description: 'Conçu pour le nomade exigeant qui maîtrise aussi bien la salle de réunion que les horizons urbains. Le sac à dos Zephyr offre un profil aérodynamique épuré en cuir de veau mat imperméable, agrémenté de subtiles côtes zébrées ton sur ton sur les panneaux latéraux et le dessous des bretelles.',
     details: [
       'Housse matelassée absorbant les chocs pour ordinateur portable 16" avec fermeture magnétique',
       'Poche passeport cachée anti-RFID sur le panneau dorsal respirant',
@@ -180,7 +177,6 @@ export const PRODUCTS: Product[] = [
       { name: 'Toile Brute & Garniture Sangle Zébrée', hex: '#262626', previewUrl: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=400&q=80' },
       { name: 'Édition Cuir Noir Intégral', hex: '#0a0a0a', previewUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=400&q=80' },
     ],
-    description: 'Le sac de voyage de luxe par excellence pour vos escapades de 3 jours. Conçu selon les normes strictes de format cabine des compagnies aériennes internationales, le Serengeti associe une toile cirée ultra-résistante à des poignées en cuir sellier pleine fleur et une audacieuse bande centrale en sangle zébrée.',
     details: [
       'Conforme aux dimensions maximales bagage cabine IATA',
       'Compartiment inférieur séparé et aéré pour les chaussures',
@@ -217,7 +213,6 @@ export const PRODUCTS: Product[] = [
       { name: 'Nacre Monochrome & Émail Zébré', hex: '#fdfdfd', previewUrl: 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?auto=format&fit=crop&w=400&q=80' },
       { name: 'Émail Onyx & Chrome Polie', hex: '#121212', previewUrl: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=400&q=80' },
     ],
-    description: 'Un bijou architectural pour les galas et les tapis rouges. Confectionné à la main avec un châssis rigide en laiton incrusté de rayures en émail zébré laqué alternées et une chambre intérieure doublée de velours.',
     details: [
       'Chaîne serpent délicate amovible pour un porté épaule optionnel',
       'Fermoir poussoir biseauté orné d’un cristal de quartz fumé',
@@ -252,7 +247,6 @@ export const PRODUCTS: Product[] = [
       { name: 'Blanc Pur & Pompon Zébré', hex: '#f5f5f4', previewUrl: 'https://images.unsplash.com/photo-1591561954557-26941169b49e?auto=format&fit=crop&w=400&q=80' },
       { name: 'Nappa Noir Jais', hex: '#171717', previewUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=400&q=80' },
     ],
-    description: 'Un chef-d’œuvre sculptural cylindrique. Taillé dans un cuir de veau souple à base ronde rigide, liens coulissants en nappa ornés de pompons à franges zébrées découpés à la main, et bandoulière graphique épaisse amovible.',
     details: [
       'Base circulaire rigide renforcée avec 5 picots de protection',
       'Double porté : poignée main ou bandoulière statement',
@@ -286,7 +280,6 @@ export const PRODUCTS: Product[] = [
       { name: 'Imprimé Zébré Original', hex: '#222222', previewUrl: 'https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=400&q=80' },
       { name: 'Mono Inversé Discret', hex: '#fafafa', previewUrl: 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?auto=format&fit=crop&w=400&q=80' },
     ],
-    description: 'Le luxe épuré pour les minimalistes. 6 fentes pour cartes, un compartiment central zippé pour billets pliés ou pièces, parachevé par des tranches peintes à la main et un marquage à chaud argenté.',
     details: [
       '6 fentes extérieures pour cartes + 1 compartiment central zippé pour la monnaie',
       'Protection anti-RFID intégrée par maille invisible',
@@ -321,7 +314,6 @@ export const PRODUCTS: Product[] = [
       { name: 'Noir Tactique avec Cordon Zébré', hex: '#18181b', previewUrl: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=400&q=80' },
       { name: 'Monochrome Onyx', hex: '#27272a', previewUrl: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=400&q=80' },
     ],
-    description: 'L’architecture urbaine sublimée. Un sac sling ergonomique et mains libres conçu pour se porter sur la poitrine ou à l’épaule, doté d’une boucle magnétique style cobra et de subtiles rayures zébrées sur le harnais.',
     details: [
       'Boucle magnétique à ouverture rapide Fidlock V-buckle',
       'Poche à accès rapide zippée étanche à coutures scellées',
@@ -358,7 +350,6 @@ export const PRODUCTS: Product[] = [
       { name: 'Noir Encre & Zèbre Ivoire', hex: '#131313', previewUrl: '/assets/imgs/Bag 1.jpeg' },
       { name: 'Camel Brûlé & Anthracite', hex: '#8a6d4f', previewUrl: '' },
     ],
-    description: 'Une silhouette architecturale au rabat supérieur plié, sculpté dans un cuir de veau souple au tannage végétal. Ses anses échancrées découpées à la main et son monogramme zébré discret en font la pièce montante de la saison.',
     details: [
       'Rabat supérieur plié maintenu par des aimants dissimulés',
       'Anses échancrées robustes découpées dans la masse',
@@ -394,7 +385,6 @@ export const PRODUCTS: Product[] = [
       { name: 'Toile Noire & Intérieur Zébré', hex: '#1c1c1e', previewUrl: '' },
       { name: 'Sable Brûlé & Zèbre Charbon', hex: '#b3a389', previewUrl: '' },
     ],
-    description: 'L’allié des journées chargées. Un shopper spacieux en toile de coton cirée ultra-résistante, doublé de notre jacquard zébré signature, avec une poche à rabat frontale et des finitions en cuir pleine fleur.',
     details: [
       'Ouverture large à zip bipolaire à double curseur',
       'Doublure jacquard zébré signature en 100% coton',
@@ -429,7 +419,6 @@ export const PRODUCTS: Product[] = [
       { name: 'Basalte Gaufré & Titane', hex: '#24262a', previewUrl: '' },
       { name: 'Ébène Mat Intégral', hex: '#0b0b0c', previewUrl: '' },
     ],
-    description: 'Un monolithe d’une prestance minérale. La surface en cuir gaufré rappelle les strates zébrées de la roche, encadrée par une armature rigide et un sommet ouvert maintenu par des aimants puissants.',
     details: [
       'Structure rigide monobloc avec panneaux latéraux gaufrés',
       'Fermeture magnétique invisible intégrée au cadre',
@@ -464,7 +453,6 @@ export const PRODUCTS: Product[] = [
       { name: 'Vert Forêt & Zèbre Fumé', hex: '#2c3a2e', previewUrl: '' },
       { name: 'Noir Tactique', hex: '#1a1a1a', previewUrl: '' },
     ],
-    description: 'Conçu pour les explorateurs modernes, le Raptor combine un panneau dorsal filet aéré, une sangle ventrale zébrée stabilisatrice et une poche fluo cachée pour les visibilités urbaines et les escapades outdoors.',
     details: [
       'Sangle ventrale amovible à boucle étanche monochrome zébrée',
       'Panneau dorsal en filet 3D ventilé avec canal de chaleur',
@@ -498,7 +486,6 @@ export const PRODUCTS: Product[] = [
       { name: 'Navy Profond & Zèbre Quartz', hex: '#1f2937', previewUrl: '' },
       { name: 'Noir Intégral Haut Contraste', hex: '#101014', previewUrl: '' },
     ],
-    description: 'Un système de transport journalier triple compartiment avec panneaux latéraux en cuir zébré ton sur ton, poignée latérale de transport et base auto-portante renforcée.',
     details: [
       'Triple compartiment séparé avec ouverture clamshell suspendue',
       'Panneaux latéraux zébrés en cuir grainé embossé',
@@ -533,7 +520,6 @@ export const PRODUCTS: Product[] = [
       { name: 'Belge Sablé & Chaîne Zébrée', hex: '#d9cbb4', previewUrl: '' },
       { name: 'Noir & Maille Argent', hex: '#181818', previewUrl: '' },
     ],
-    description: 'Le sac hobo souple et généreux, taillé dans un nappa plongé d’une incroyable douceur. Sa chaîne effet gourmette entremêlée contraste élégamment avec une finition en laiton mat.',
     details: [
       'Chaîne d’épaule panachée cuir et gourmette',
       'Fermeture magnétique à alignement zébré',
@@ -569,7 +555,6 @@ export const PRODUCTS: Product[] = [
       { name: 'Vachette Cognac & Zèbre Noir', hex: '#9a6b3e', previewUrl: '' },
       { name: 'Vachette Fumé & Rayures Écru', hex: '#4c3a2a', previewUrl: '' },
     ],
-    description: 'Un week-end bag iconique en cuir vachette pleine fleur, doté d’un soufflet latéral zébré extensible qui gagne en volume lorsque vous en avez besoin, et d’un séparateur central amovible.',
     details: [
       'Soufflet zébré extensible sur les deux flancs',
       'Séparateur amovible avec poche à chaussures',
@@ -606,7 +591,6 @@ export const PRODUCTS: Product[] = [
       { name: 'Brillant Blanc & Sangle Graphite', hex: '#f4f4f2', previewUrl: '' },
       { name: 'Brillant Noir Profond', hex: '#141416', previewUrl: '' },
     ],
-    description: 'Un mini sac à harnais côtelé en cuir brillant, porté en diagonale, avec une sangle ajustable zébrée et un fermoir à boucle magnétique pour une allure saisissante mode urbain.',
     details: [
       'Harnais côtelé en relief inspiré des rayures zébrées',
       'Boucle Fidlock magnétique à ouverture rapide',
@@ -641,7 +625,6 @@ export const PRODUCTS: Product[] = [
       { name: 'Brillant Blanc & Sangle Graphite', hex: '#f4f4f2', previewUrl: '' },
       { name: 'Brillant Noir Profond', hex: '#141416', previewUrl: '' },
     ],
-    description: 'Un mini sac à harnais côtelé en cuir brillant, porté en diagonale, avec une sangle ajustable zébrée et un fermoir à boucle magnétique pour une allure saisissante mode urbain.',
     details: [
       'Harnais côtelé en relief inspiré des rayures zébrées',
       'Boucle Fidlock magnétique à ouverture rapide',

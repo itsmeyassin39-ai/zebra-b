@@ -14,12 +14,10 @@ import {
   CheckCircle2,
   ShoppingBag,
   Folder,
-  Instagram,
   ClipboardList,
   RefreshCw,
   ChevronDown,
   ChevronUp,
-  MessageSquare,
   Lock,
   LogOut,
   Bell,
@@ -28,7 +26,7 @@ import {
   Volume2,
   Sparkles,
 } from 'lucide-react';
-import { Product, CategoryInfo, InstagramPost, ProductColor, Order, OrderStatus, Currency, CustomerReview } from '../types';
+import { Product, CategoryInfo, ProductColor, Order, OrderStatus, Currency } from '../types';
 import { useStore } from '../store/StoreContext';
 import { logout, getRememberedEmail, getToken } from '../store/auth';
 import { api } from '../api/client';
@@ -51,13 +49,11 @@ interface DashboardProps {
   onClose: () => void;
 }
 
-type TabId = 'products' | 'categories' | 'posts' | 'reviews' | 'orders';
+type TabId = 'products' | 'categories' | 'orders';
 
 const TABS: { id: TabId; label: string; icon: React.FC<{ className?: string }> }[] = [
   { id: 'products', label: 'Mes produits', icon: ShoppingBag },
   { id: 'categories', label: 'Mes catégories', icon: Folder },
-  { id: 'posts', label: 'Mes publications', icon: Instagram },
-  { id: 'reviews', label: 'Mes avis', icon: MessageSquare },
   { id: 'orders', label: 'Mes commandes', icon: ClipboardList },
 ];
 
@@ -93,13 +89,14 @@ interface ProductFormState {
   detail: string;
   lifestyle: string;
   colors: ProductColor[];
-  description: string;
   material: string;
+  lining: string;
   hardware: string;
   weight: string;
   strapDrop: string;
   zebraAccentStyle: string;
   featuresText: string;
+  dimensions: { width: number; height: number; depth: number; unit: string };
 }
 
 const emptyProductForm = (categoryId: string, categoryName: string): ProductFormState => ({
@@ -120,13 +117,14 @@ const emptyProductForm = (categoryId: string, categoryName: string): ProductForm
   detail: '',
   lifestyle: '',
   colors: [{ name: '', hex: '#fafaf9', previewUrl: '' }],
-  description: '',
   material: '',
+  lining: '',
   hardware: 'Argent brossé Palladium',
   weight: '',
   strapDrop: '',
   zebraAccentStyle: '',
   featuresText: '',
+  dimensions: { width: 30, height: 22, depth: 12, unit: 'cm' },
 });
 
 function productToForm(p: Product): ProductFormState {
@@ -148,42 +146,19 @@ function productToForm(p: Product): ProductFormState {
     detail: p.images.detail ?? '',
     lifestyle: p.images.lifestyle ?? '',
     colors: p.colors.map((c) => ({ ...c })),
-    description: p.description,
     material: p.material,
+    lining: p.lining ?? '',
     hardware: p.hardware,
     weight: p.weight,
     strapDrop: p.strapDrop,
     zebraAccentStyle: p.zebraAccentStyle,
     featuresText: (p.features ?? []).join(', '),
-  };
-}
-
-interface PostFormState {
-  handle: string;
-  caption: string;
-  imageUrl: string;
-  likes: number;
-  comments: number;
-  productId: string;
-}
-
-const emptyPostForm = (productId: string): PostFormState => ({
-  handle: 'zebrabags',
-  caption: '',
-  imageUrl: '',
-  likes: 0,
-  comments: 0,
-  productId,
-});
-
-function postToForm(p: InstagramPost): PostFormState {
-  return {
-    handle: p.handle,
-    caption: p.caption,
-    imageUrl: p.imageUrl,
-    likes: p.likes,
-    comments: p.comments,
-    productId: p.productId,
+    dimensions: {
+      width: p.dimensions?.width ?? 30,
+      height: p.dimensions?.height ?? 22,
+      depth: p.dimensions?.depth ?? 12,
+      unit: p.dimensions?.unit ?? 'cm',
+    },
   };
 }
 
@@ -312,28 +287,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
   const [formError, setFormError] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  const [postDrawerOpen, setPostDrawerOpen] = useState(false);
-  const [editingPostId, setEditingPostId] = useState<string | null>(null);
-  const [postForm, setPostForm] = useState<PostFormState>(() =>
-    emptyPostForm(store.products[0]?.id ?? '')
-  );
-
-  // review editor state
-  const [reviewDrawerOpen, setReviewDrawerOpen] = useState(false);
-  const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
-  const [reviewForm, setReviewForm] = useState<CustomerReview>({
-    id: '',
-    author: '',
-    location: '',
-    rating: 5,
-    date: '',
-    title: '',
-    comment: '',
-    productPurchased: '',
-    verified: true,
-    avatarUrl: '',
-  });
-
   const [searchTerm, setSearchTerm] = useState('');
   const [securityOpen, setSecurityOpen] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -397,7 +350,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
         productForm.colors.filter((c) => c.name.trim()).length > 0
           ? productForm.colors.filter((c) => c.name.trim())
           : [{ name: 'Zèbre Signature', hex: '#fafaf9', previewUrl: main }],
-      description: productForm.description,
       material: productForm.material,
       hardware: productForm.hardware,
       weight: productForm.weight,
@@ -407,8 +359,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
         .split(',')
         .map((s) => s.trim())
         .filter(Boolean),
-      dimensions: { width: 30, height: 22, depth: 12, unit: 'cm' },
-      lining: 'Cuir de veau microfibre',
+      dimensions: {
+        width: Number(productForm.dimensions.width) || 30,
+        height: Number(productForm.dimensions.height) || 22,
+        depth: Number(productForm.dimensions.depth) || 12,
+        unit: productForm.dimensions.unit || 'cm',
+      },
+      lining: productForm.lining,
     };
     if (editingProductId) {
       store.updateProduct(editingProductId, base);
@@ -418,111 +375,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
       notify('Produit ajouté ✓');
     }
     setProductDrawerOpen(false);
-  };
-
-  const openNewPost = () => {
-    setEditingPostId(null);
-    setFormError('');
-    setPostForm(emptyPostForm(store.products[0]?.id ?? ''));
-    setPostDrawerOpen(true);
-  };
-
-  const openEditPost = (p: InstagramPost) => {
-    setEditingPostId(p.id);
-    setFormError('');
-    setPostForm(postToForm(p));
-    setPostDrawerOpen(true);
-  };
-
-  const handleSavePost = () => {
-    if (!postForm.caption.trim() && !postForm.imageUrl.trim()) {
-      setFormError('Ajoutez une légende ou une image.');
-      return;
-    }
-    const prod = store.products.find((p) => p.id === postForm.productId);
-    const payload = {
-      handle: postForm.handle.trim() || 'zebrabags',
-      caption: postForm.caption,
-      imageUrl: postForm.imageUrl || prod?.images.main || '',
-      likes: postForm.likes,
-      comments: postForm.comments,
-      productId: postForm.productId,
-      productTaggedName: prod?.name ?? '',
-      productTaggedPrice: prod?.price ?? 0,
-    };
-    if (editingPostId) {
-      store.updateInstagramPost(editingPostId, payload);
-      notify('Publication modifiée ✓');
-    } else {
-      store.addInstagramPost({ id: `post-${Date.now()}`, ...payload });
-      notify('Publication ajoutée ✓');
-    }
-    setPostDrawerOpen(false);
-  };
-
-  const openNewReview = () => {
-    setEditingReviewId(null);
-    setFormError('');
-    setReviewForm({
-      id: '',
-      author: '',
-      location: '',
-      rating: 5,
-      date: 'récemment',
-      title: '',
-      comment: '',
-      productPurchased: '',
-      verified: true,
-      avatarUrl: '',
-    });
-    setReviewDrawerOpen(true);
-  };
-
-  const openEditReview = (r: CustomerReview) => {
-    setEditingReviewId(r.id);
-    setFormError('');
-    setReviewForm({
-      ...r,
-      avatarUrl: r.avatarUrl ?? '',
-    });
-    setReviewDrawerOpen(true);
-  };
-
-  const handleSaveReview = async () => {
-    if (!reviewForm.author.trim()) {
-      setFormError('Donnez un nom au client.');
-      return;
-    }
-    if (!reviewForm.comment.trim()) {
-      setFormError('Écrivez le commentaire de l\u2019avis.');
-      return;
-    }
-    const payload: CustomerReview = {
-      ...reviewForm,
-      author: reviewForm.author.trim(),
-      location: reviewForm.location.trim(),
-      title: reviewForm.title.trim(),
-      comment: reviewForm.comment.trim(),
-      productPurchased: reviewForm.productPurchased.trim(),
-      date: reviewForm.date.trim() || 'récemment',
-      avatarUrl: '',
-    };
-    try {
-      if (editingReviewId) {
-        await store.updateCustomerReview(editingReviewId, payload);
-        notify('Avis modifié ✓');
-      } else {
-        await store.addCustomerReview({ ...payload, id: `review-${Date.now()}` });
-        notify('Avis ajouté ✓');
-      }
-      setReviewDrawerOpen(false);
-    } catch (error) {
-      if (error instanceof Error) {
-        setFormError(error.message);
-        return;
-      }
-      setFormError('Erreur lors de l\u2019enregistrement. Réessayez.');
-    }
   };
 
   const handleExport = () => {
@@ -589,12 +441,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-2 mt-5 flex-wrap">
+          <div className="flex gap-2 mt-5 items-center overflow-x-auto scrollbar-none pb-1">
             {TABS.map((t) => (
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors cursor-pointer ${
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
                   tab === t.id
                     ? 'bg-black text-white shadow-sm'
                     : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
@@ -604,7 +456,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                 {t.label}
               </button>
             ))}
-            <div className="ml-auto flex items-center gap-2">
+            <div className="ml-auto flex items-center gap-1 sm:gap-2 shrink-0">
               <button onClick={handleExport} className="p-2.5 rounded-xl text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 transition-colors cursor-pointer" title="Sauvegarder une copie sur mon ordinateur">
                 <Download className="w-4 h-4" />
               </button>
@@ -826,90 +678,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
         {/* ================= CATEGORIES ================= */}
         {tab === 'categories' && <CategoriesTab />}
 
-        {/* ================= AVIS ================= */}
-        {tab === 'reviews' && (
-          <ReviewsTab
-            onNew={() => openNewReview()}
-            onEdit={(r) => openEditReview(r)}
-          />
-        )}
-
         {/* ================= COMMANDES ================= */}
         {tab === 'orders' && <OrdersTab liveOrder={liveOrder} />}
-
-        {/* ================= PUBLICATIONS ================= */}
-        {tab === 'posts' && (
-          <section>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <div className="text-zinc-600">
-                <span className="font-bold">{store.instagramPosts.length}</span> publication(s)
-              </div>
-              <button onClick={openNewPost} className={btnPrimary}>
-                <Plus className="w-4 h-4" />
-                Ajouter une publication
-              </button>
-            </div>
-
-            {store.instagramPosts.length === 0 ? (
-              <div className="text-center py-24 bg-white rounded-2xl border border-zinc-200">
-                <p className="text-zinc-500">Aucune publication pour le moment.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {store.instagramPosts.map((p) => (
-                  <div key={p.id} className="bg-white rounded-2xl border border-zinc-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col">
-                    <div className="relative aspect-square bg-zinc-100">
-                      {p.imageUrl ? (
-                        <img src={p.imageUrl} alt={p.caption} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-zinc-300">
-                          <Instagram className="w-8 h-8" />
-                        </div>
-                      )}
-                      <span className="absolute top-3 left-3 bg-black/70 backdrop-blur px-2.5 py-1 rounded-lg text-white text-xs font-bold">@{p.handle}</span>
-                    </div>
-
-                    <div className="p-4 flex flex-col flex-1">
-                      <p className="text-sm text-zinc-700 line-clamp-2 mb-2">
-                        {p.caption || '(sans légende)'}
-                      </p>
-                      <div className="flex items-center gap-4 text-xs font-mono text-zinc-500 mb-3">
-                        <span>♥ {p.likes} j&#39;aime</span>
-                        <span>💬 {p.comments} commentaires</span>
-                      </div>
-                      <div className="text-xs text-zinc-600 mb-4">
-                        Produit montré :{' '}
-                        <span className="font-semibold text-zinc-900">{p.productTaggedName || 'aucun'}</span>
-                      </div>
-
-                      <div className="mt-auto pt-4 border-t border-zinc-100 flex gap-2">
-                        <button
-                          onClick={() => {
-                            if (window.confirm('Supprimer cette publication ?')) {
-                              store.deleteInstagramPost(p.id);
-                              notify('Publication supprimée');
-                            }
-                          }}
-                          className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-red-200 text-red-600 text-sm font-bold hover:bg-red-50 transition-colors cursor-pointer"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                          Supprimer
-                        </button>
-                        <button
-                          onClick={() => openEditPost(p)}
-                          className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-black text-white text-sm font-bold hover:bg-zinc-800 transition-colors cursor-pointer"
-                        >
-                          <Pencil className="w-4 h-4" />
-                          Modifier
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-        )}
       </main>
 
       {/* ================= ÉDITEUR PRODUIT ================= */}
@@ -988,7 +758,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                     <p className={labelHint}>La catégorie s&#39;affiche sur la fiche produit.</p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className={labelCls}>Prix (en DH)</label>
                       <input
@@ -1046,6 +816,34 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                 </div>
               </div>
 
+              {/* Détails du produit (primaires) */}
+              <div className="border-t border-zinc-100 pt-4">
+                <h3 className="text-sm font-bold text-zinc-900 mb-4">Détails du produit</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className={labelCls}>Matière</label>
+                    <input className={inputCls} value={productForm.material} onChange={(e) => setProductForm((f) => ({ ...f, material: e.target.value }))} placeholder="Ex : Poil de veau" />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Doublure</label>
+                    <input className={inputCls} value={productForm.lining} onChange={(e) => setProductForm((f) => ({ ...f, lining: e.target.value }))} placeholder="Ex : Cuir de veau microfibre" />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Poids</label>
+                    <input className={inputCls} value={productForm.weight} onChange={(e) => setProductForm((f) => ({ ...f, weight: e.target.value }))} placeholder="Ex : 1,2 kg" />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Dimensions</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <input type="number" min={0} className={inputCls} value={productForm.dimensions.width} onChange={(e) => setProductForm((f) => ({ ...f, dimensions: { ...f.dimensions, width: Number(e.target.value) } }))} placeholder="Larg." title="Largeur" />
+                      <input type="number" min={0} className={inputCls} value={productForm.dimensions.height} onChange={(e) => setProductForm((f) => ({ ...f, dimensions: { ...f.dimensions, height: Number(e.target.value) } }))} placeholder="Haut." title="Hauteur" />
+                      <input type="number" min={0} className={inputCls} value={productForm.dimensions.depth} onChange={(e) => setProductForm((f) => ({ ...f, dimensions: { ...f.dimensions, depth: Number(e.target.value) } }))} placeholder="Prof." title="Profondeur" />
+                    </div>
+                    <input className={`${inputCls} mt-2`} value={productForm.dimensions.unit} onChange={(e) => setProductForm((f) => ({ ...f, dimensions: { ...f.dimensions, unit: e.target.value } }))} placeholder="cm" title="Unité" />
+                  </div>
+                </div>
+              </div>
+
               {/* Avancé (replié) */}
               <div className="border-t border-zinc-100 pt-4">
                 <button
@@ -1063,7 +861,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                       <input className={inputCls} value={productForm.tagline} onChange={(e) => setProductForm((f) => ({ ...f, tagline: e.target.value }))} placeholder="Ex : Le cabas signature en poil de zèbre" />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className={labelCls}>Note (0 à 5)</label>
                         <input type="number" min={0} max={5} step={0.1} className={inputCls} value={productForm.rating} onChange={(e) => setProductForm((f) => ({ ...f, rating: Number(e.target.value) || 0 }))} />
@@ -1074,7 +872,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <ImageUploadField
                           label="Photo au survol"
@@ -1100,57 +898,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                         />
                       </div>
                     </div>
-
-                    <div>
-                      <label className={labelCls}>Couleurs disponibles</label>
-                      <div className="space-y-2">
-                        {productForm.colors.map((c, idx) => (
-                          <div key={idx} className="flex items-center gap-2">
-                            <input className={inputCls} value={c.name} placeholder="Nom de la couleur" onChange={(e) => setProductForm((f) => ({ ...f, colors: f.colors.map((cc, i) => (i === idx ? { ...cc, name: e.target.value } : cc)) }))} />
-                            <input type="color" className="w-12 h-12 rounded-xl border border-zinc-300 bg-white cursor-pointer shrink-0" value={c.hex} onChange={(e) => setProductForm((f) => ({ ...f, colors: f.colors.map((cc, i) => (i === idx ? { ...cc, hex: e.target.value } : cc)) }))} />
-                            <button onClick={() => setProductForm((f) => ({ ...f, colors: f.colors.filter((_, i) => i !== idx) }))} className="p-2 text-zinc-400 hover:text-red-600 cursor-pointer shrink-0" title="Retirer cette couleur">
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ))}
-                        <button onClick={() => setProductForm((f) => ({ ...f, colors: [...f.colors, { name: '', hex: '#fafaf9', previewUrl: '' }] }))} className="text-sm font-bold text-zinc-700 hover:text-black inline-flex items-center gap-1 cursor-pointer">
-                          <Plus className="w-4 h-4" />
-                          Ajouter une couleur
-                        </button>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className={labelCls}>Description du produit</label>
-                      <textarea rows={4} className={inputCls} value={productForm.description} onChange={(e) => setProductForm((f) => ({ ...f, description: e.target.value }))} />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className={labelCls}>Matière</label>
-                        <input className={inputCls} value={productForm.material} onChange={(e) => setProductForm((f) => ({ ...f, material: e.target.value }))} placeholder="Ex : Poil de veau" />
-                      </div>
-                      <div>
-                        <label className={labelCls}>Poids</label>
-                        <input className={inputCls} value={productForm.weight} onChange={(e) => setProductForm((f) => ({ ...f, weight: e.target.value }))} placeholder="Ex : 1,2 kg" />
-                      </div>
-                      <div>
-                        <label className={labelCls}>Quincaillerie</label>
-                        <input className={inputCls} value={productForm.hardware} onChange={(e) => setProductForm((f) => ({ ...f, hardware: e.target.value }))} />
-                      </div>
-                      <div>
-                        <label className={labelCls}>Tombant de la sangle</label>
-                        <input className={inputCls} value={productForm.strapDrop} onChange={(e) => setProductForm((f) => ({ ...f, strapDrop: e.target.value }))} />
-                      </div>
-                      <div className="col-span-2">
-                        <label className={labelCls}>Caractéristiques (séparées par des virgules)</label>
-                        <input className={inputCls} value={productForm.featuresText} onChange={(e) => setProductForm((f) => ({ ...f, featuresText: e.target.value }))} placeholder="Ex : Fermeture par tourniquet, Doublure zébrée" />
-                      </div>
-                      <div className="col-span-2">
-                        <label className={labelCls}>Style d&#39;accent zèbre</label>
-                        <input className={inputCls} value={productForm.zebraAccentStyle} onChange={(e) => setProductForm((f) => ({ ...f, zebraAccentStyle: e.target.value }))} />
-                      </div>
-                    </div>
                   </div>
                 )}
               </div>
@@ -1168,201 +915,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
               <button onClick={handleSaveProduct} className={btnPrimary}>
                 <Save className="w-4 h-4" />
                 Enregistrer le produit
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ================= ÉDITEUR PUBLICATION ================= */}
-      {postDrawerOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end">
-          <div className="w-full max-w-xl bg-white h-full overflow-y-auto shadow-2xl">
-            <div className="sticky top-0 bg-white border-b border-zinc-200 px-6 py-4 flex items-center justify-between z-10">
-              <h2 className="font-display text-lg font-extrabold">
-                {editingPostId ? 'Modifier la publication' : 'Nouvelle publication'}
-              </h2>
-              <button
-                onClick={() => {
-                  if (window.confirm('Fermer sans enregistrer ?')) setPostDrawerOpen(false);
-                }}
-                className="p-2 rounded-xl hover:bg-zinc-100 cursor-pointer"
-                title="Fermer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-5">
-              {formError && (
-                <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 text-sm font-semibold px-4 py-3 rounded-xl">
-                  <AlertTriangle className="w-5 h-5" />
-                  {formError}
-                </div>
-              )}
-
-              <div>
-                <label className={labelCls}>Photo de la publication</label>
-                <div className="flex items-center gap-4">
-                  {postForm.imageUrl ? (
-                    <img src={postForm.imageUrl} alt="Aperçu" referrerPolicy="no-referrer" className="w-24 h-24 rounded-xl object-cover bg-zinc-100 border border-zinc-200 shrink-0" />
-                  ) : (
-                    <div className="w-24 h-24 rounded-xl bg-zinc-100 border border-zinc-200 flex items-center justify-center text-zinc-300 shrink-0">
-                      <Instagram className="w-7 h-7" />
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <input className={inputCls} value={postForm.imageUrl} onChange={(e) => setPostForm((f) => ({ ...f, imageUrl: e.target.value }))} placeholder="Collez le lien de la photo…" />
-                    <p className={labelHint}>Astuce : écrivez <code className="bg-zinc-100 px-1 rounded">/assets/imgs/ma-photo.jpg</code> pour une photo de votre boutique.</p>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label className={labelCls}>Compte Instagram</label>
-                <input className={inputCls} value={postForm.handle} onChange={(e) => setPostForm((f) => ({ ...f, handle: e.target.value }))} placeholder="zebrabags" />
-              </div>
-
-              <div>
-                <label className={labelCls}>Légende</label>
-                <textarea rows={4} className={inputCls} value={postForm.caption} onChange={(e) => setPostForm((f) => ({ ...f, caption: e.target.value }))} placeholder="Ex : La nouvelle bandoulière est arrivée 🖤" />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className={labelCls}>Nombre de j&#39;aime</label>
-                  <input type="number" min={0} className={inputCls} value={postForm.likes} onChange={(e) => setPostForm((f) => ({ ...f, likes: Number(e.target.value) || 0 }))} />
-                </div>
-                <div>
-                  <label className={labelCls}>Nombre de commentaires</label>
-                  <input type="number" min={0} className={inputCls} value={postForm.comments} onChange={(e) => setPostForm((f) => ({ ...f, comments: Number(e.target.value) || 0 }))} />
-                </div>
-              </div>
-
-              <div>
-                <label className={labelCls}>Quel produit est montré ?</label>
-                <select className={inputCls} value={postForm.productId} onChange={(e) => setPostForm((f) => ({ ...f, productId: e.target.value }))}>
-                  <option value="">— Aucun —</option>
-                  {store.products.map((p) => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
-                  ))}
-                </select>
-                <p className={labelHint}>Les visiteurs pourront acheter ce produit depuis la publication.</p>
-              </div>
-            </div>
-
-            <div className="sticky bottom-0 bg-white border-t border-zinc-200 px-6 py-4 flex justify-end gap-2">
-              <button
-                onClick={() => {
-                  if (window.confirm('Fermer sans enregistrer ?')) setPostDrawerOpen(false);
-                }}
-                className={btnSecondary}
-              >
-                Annuler
-              </button>
-              <button onClick={handleSavePost} className={btnPrimary}>
-                <Save className="w-4 h-4" />
-                Enregistrer la publication
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ================= ÉDITEUR AVIS ================= */}
-      {reviewDrawerOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end">
-          <div className="w-full max-w-xl bg-white h-full overflow-y-auto shadow-2xl">
-            <div className="sticky top-0 bg-white border-b border-zinc-200 px-6 py-4 flex items-center justify-between z-10">
-              <h2 className="font-display text-lg font-extrabold">
-                {editingReviewId ? 'Modifier l\u2019avis' : 'Nouvel avis'}
-              </h2>
-              <button
-                onClick={() => {
-                  if (window.confirm('Fermer sans enregistrer ?')) setReviewDrawerOpen(false);
-                }}
-                className="p-2 rounded-xl hover:bg-zinc-100 cursor-pointer"
-                title="Fermer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-5">
-              {formError && (
-                <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 text-sm font-semibold px-4 py-3 rounded-xl">
-                  <AlertTriangle className="w-5 h-5" />
-                  {formError}
-                </div>
-              )}
-
-              <div className="hidden" aria-hidden="true">
-                <ImageUploadField
-                  label="Photo du client"
-                  value={reviewForm.avatarUrl ?? ''}
-                  onChange={(url) => setReviewForm((f) => ({ ...f, avatarUrl: url }))}
-                  hint="Choisissez une photo depuis votre téléphone. Elle sera automatiquement chargée sur le serveur."
-                />
-              </div>
-
-              <div>
-                <label className={labelCls}>Nom complet du client</label>
-                <input className={inputCls} value={reviewForm.author} onChange={(e) => setReviewForm((f) => ({ ...f, author: e.target.value }))} placeholder="Ex : Denis Slavska" />
-              </div>
-
-
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className={labelCls}>Ville / Pays</label>
-                  <input className={inputCls} value={reviewForm.location} onChange={(e) => setReviewForm((f) => ({ ...f, location: e.target.value }))} placeholder="Ex : Casablanca, Maroc ou New York" />
-                </div>
-                <div>
-                  <label className={labelCls}>Date</label>
-                  <input className={inputCls} value={reviewForm.date} onChange={(e) => setReviewForm((f) => ({ ...f, date: e.target.value }))} placeholder="il y a 2 jours" />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className={labelCls}>Note (1 à 5)</label>
-                  <input type="number" min={1} max={5} className={inputCls} value={reviewForm.rating} onChange={(e) => setReviewForm((f) => ({ ...f, rating: Math.min(5, Math.max(1, Number(e.target.value) || 5)) }))} />
-                </div>
-                <div>
-                  <label className={labelCls}>Produit acheté (optionnel)</label>
-                  <input className={inputCls} value={reviewForm.productPurchased} onChange={(e) => setReviewForm((f) => ({ ...f, productPurchased: e.target.value }))} placeholder="Ex : Cabas Monolithe" />
-                </div>
-              </div>
-
-              <div>
-                <label className={labelCls}>Titre court (optionnel)</label>
-                <input className={inputCls} value={reviewForm.title} onChange={(e) => setReviewForm((f) => ({ ...f, title: e.target.value }))} placeholder="Ex : Excellente qualité" />
-              </div>
-
-              <div>
-                <label className={labelCls}>Commentaire / Déclaration du client</label>
-                <textarea rows={4} className={inputCls} value={reviewForm.comment} onChange={(e) => setReviewForm((f) => ({ ...f, comment: e.target.value }))} placeholder="Ex : Ils adaptent parfaitement leurs créations à nos exigences spécifiques." />
-                <p className={labelHint}>Ce texte apparaîtra en grand format sur la carte du site.</p>
-              </div>
-
-              <label className="flex items-center gap-3 text-sm font-semibold text-zinc-800 cursor-pointer bg-zinc-50 border border-zinc-200 px-4 py-3 rounded-xl">
-                <input type="checkbox" checked={reviewForm.verified} onChange={(e) => setReviewForm((f) => ({ ...f, verified: e.target.checked }))} />
-                Avis vérifié (Acheteur certifié)
-              </label>
-            </div>
-
-            <div className="sticky bottom-0 bg-white border-t border-zinc-200 px-6 py-4 flex justify-end gap-2">
-              <button
-                onClick={() => {
-                  if (window.confirm('Fermer sans enregistrer ?')) setReviewDrawerOpen(false);
-                }}
-                className={btnSecondary}
-              >
-                Annuler
-              </button>
-              <button onClick={handleSaveReview} className={btnPrimary}>
-                <Save className="w-4 h-4" />
-                Enregistrer l\u2019avis
               </button>
             </div>
           </div>
@@ -1783,97 +1335,6 @@ const CategoryCard: React.FC<{ category: CategoryInfo; productCount: number }> =
         </button>
       </div>
     </div>
-  );
-};
-
-const ReviewsTab: React.FC<{ onNew: () => void; onEdit: (r: CustomerReview) => void }> = ({
-  onNew,
-  onEdit,
-}) => {
-  const store = useStore();
-  const reviews = store.customerReviews;
-
-  const remove = (r: CustomerReview) => {
-    if (window.confirm(`Supprimer l\u2019avis de « ${r.author} » ?`)) {
-      store.deleteCustomerReview(r.id);
-    }
-  };
-
-  const initials = (name: string) => name.trim().charAt(0).toUpperCase() || '?';
-
-  return (
-    <section>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div className="text-zinc-600">
-          <span className="font-bold">{reviews.length}</span> avis
-        </div>
-        <button onClick={onNew} className={btnPrimary}>
-          <Plus className="w-4 h-4" />
-          Ajouter un avis
-        </button>
-      </div>
-
-      {reviews.length === 0 ? (
-        <div className="text-center py-24 bg-white rounded-2xl border border-zinc-200">
-          <MessageSquare className="w-10 h-10 text-zinc-300 mx-auto mb-3" />
-          <p className="text-zinc-500">Aucun avis pour le moment.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {reviews.map((r) => (
-            <div key={r.id} className="bg-white rounded-2xl border border-zinc-200 p-5 shadow-sm flex flex-col">
-              <div className="flex items-start justify-between gap-3 mb-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-11 h-11 rounded-full bg-zinc-900 text-white flex items-center justify-center font-display text-sm shrink-0">
-                    {initials(r.author)}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="font-bold text-sm text-zinc-900 truncate flex items-center gap-1.5">
-                      {r.author}
-                      {r.verified && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />}
-                    </div>
-                    <div className="text-[10px] text-zinc-400 font-mono mt-0.5 truncate">
-                      {r.location ? `${r.location} • ` : ''}
-                      {r.date}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-col items-end gap-1.5 shrink-0">
-                  <span className="text-xs font-mono text-zinc-700 bg-zinc-100 px-2 py-0.5 rounded-full font-bold">★ {r.rating}/5</span>
-                </div>
-              </div>
-
-              {r.title && <div className="font-semibold text-sm text-zinc-900 mb-1">{r.title}</div>}
-              <p className="text-sm text-zinc-700 leading-relaxed line-clamp-3 italic">
-                &ldquo;{r.comment}&rdquo;
-              </p>
-              {r.productPurchased && (
-                <div className="mt-2 text-[10px] font-mono uppercase tracking-wider text-zinc-400">
-                  Acheté : {r.productPurchased}
-                </div>
-              )}
-
-              <div className="mt-4 pt-4 border-t border-zinc-100 flex gap-2">
-                <button
-                  onClick={() => remove(r)}
-                  className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-red-200 text-red-600 text-sm font-bold hover:bg-red-50 transition-colors cursor-pointer"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Supprimer
-                </button>
-                <button
-                  onClick={() => onEdit(r)}
-                  className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-black text-white text-sm font-bold hover:bg-zinc-800 transition-colors cursor-pointer"
-                >
-                  <Pencil className="w-4 h-4" />
-                  Modifier
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </section>
   );
 };
 

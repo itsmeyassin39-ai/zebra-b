@@ -187,8 +187,8 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                       <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-white' : ''}`} />
                     </button>
 
-                    {/* Hover Quick Action Button */}
-                    <div className="absolute inset-x-3 bottom-3 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-200 z-10">
+                    {/* Quick Action Button — always visible on mobile */}
+                    <div className="absolute inset-x-3 bottom-3 z-10 lg:opacity-0 lg:group-hover:opacity-100 lg:transform lg:translate-y-2 lg:group-hover:translate-y-0 transition-all duration-200">
                       <button
                         disabled={isOutOfStock}
                         onClick={(e) => handleQuickAdd(e, product)}

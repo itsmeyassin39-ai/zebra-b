@@ -27,7 +27,6 @@ export interface Product {
     lifestyle?: string;
   };
   colors: ProductColor[];
-  description: string;
   details?: string[];
   dimensions: {
     width: number;

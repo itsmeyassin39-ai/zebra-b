@@ -5,7 +5,6 @@ import {
   ShoppingBag,
   ShieldCheck,
   Truck,
-  Sparkles,
   ChevronLeft,
   ChevronRight,
   Check,
@@ -64,17 +63,18 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 sm:p-6">
+    <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/85 backdrop-blur-md transition-opacity"
         onClick={onClose}
       />
 
-      <div
-        id="quick-view-modal-card"
-        className="relative z-10 max-w-5xl w-full bg-[#111114] border border-zinc-700/80 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden text-white my-8 animate-in zoom-in-95 duration-200"
-      >
+      <div className="min-h-full flex items-center justify-center p-4 sm:p-6">
+        <div
+          id="quick-view-modal-card"
+          className="relative z-10 max-w-5xl w-full bg-[#111114] border border-zinc-700/80 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden text-white animate-in zoom-in-95 duration-200"
+        >
         {/* Close Button */}
         <button
           id="btn-close-quick-view"
@@ -88,7 +88,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
           
           {/* Left Column: Image Gallery (7 cols) */}
-          <div className="lg:col-span-7 p-6 sm:p-8 bg-zinc-950/90 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-zinc-800">
+          <div className="lg:col-span-7 p-6 sm:p-8 bg-zinc-950/90 lg:border-r border-zinc-800">
             {/* Big Active Image */}
             <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-black border border-zinc-800 flex items-center justify-center">
               <img
@@ -148,9 +148,9 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
           </div>
 
           {/* Right Column: Product Customizer & Details (5 cols) */}
-          <div className="lg:col-span-5 p-6 sm:p-8 flex flex-col justify-between text-left space-y-6 max-h-[85vh] overflow-y-auto">
+          <div className="lg:col-span-5 p-6 sm:p-8 flex flex-col text-left space-y-6">
             
-            <div className="space-y-4">
+            <div className="space-y-5">
               {/* Category & Serial Tag */}
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-zinc-400">
@@ -166,9 +166,6 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                 <h2 className="font-display text-xl sm:text-2xl font-bold text-white tracking-wide">
                   {product.name}
                 </h2>
-                <p className="text-xs text-zinc-400 font-light mt-1">
-                  {product.tagline}
-                </p>
                 <div className="flex items-center gap-3 mt-3">
                   <span className="text-xl font-bold text-white font-mono">
                     {formatPrice(product.price, currentCurrency)}
@@ -182,6 +179,27 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                 </div>
               </div>
 
+              {/* Materials & Craft specs */}
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <div className="rounded-xl bg-zinc-900/60 border border-zinc-800 p-3">
+                  <span className="block text-[9px] font-mono uppercase tracking-widest text-zinc-500">Matière</span>
+                  <span className="block text-xs text-zinc-200 mt-1 leading-snug">{product.material}</span>
+                </div>
+                <div className="rounded-xl bg-zinc-900/60 border border-zinc-800 p-3">
+                  <span className="block text-[9px] font-mono uppercase tracking-widest text-zinc-500">Doublure</span>
+                  <span className="block text-xs text-zinc-200 mt-1 leading-snug">{product.lining}</span>
+                </div>
+                <div className="rounded-xl bg-zinc-900/60 border border-zinc-800 p-3">
+                  <span className="block text-[9px] font-mono uppercase tracking-widest text-zinc-500">Dimensions</span>
+                  <span className="block text-xs text-zinc-200 mt-1">
+                    {product.dimensions.width} × {product.dimensions.height} × {product.dimensions.depth} {product.dimensions.unit}
+                  </span>
+                </div>
+                <div className="rounded-xl bg-zinc-900/60 border border-zinc-800 p-3">
+                  <span className="block text-[9px] font-mono uppercase tracking-widest text-zinc-500">Poids</span>
+                  <span className="block text-xs text-zinc-200 mt-1">{product.weight}</span>
+                </div>
+              </div>
               </div>
 
             {/* Action Bottom Row: Quantity + Add to Bag + Wishlist */}
@@ -244,18 +262,19 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
               </div>
 
               {/* Guarantees */}
-              <div className="flex items-center justify-between text-[10px] text-zinc-400 pt-1">
+              <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] text-zinc-400 pt-1">
                 <span className="flex items-center gap-1">
-                  <Truck className="w-3 h-3 text-zinc-300" /> Livraison Express offerte au Maroc
+                  <Truck className="w-3 h-3 text-zinc-300 shrink-0" /> Livraison Express offerte au Maroc
                 </span>
                 <span className="flex items-center gap-1">
-                  <ShieldCheck className="w-3 h-3 text-zinc-300" /> Garantie à Vie
+                  <ShieldCheck className="w-3 h-3 text-zinc-300 shrink-0" /> Garantie à Vie
                 </span>
               </div>
             </div>
 
           </div>
 
+        </div>
         </div>
       </div>
     </div>

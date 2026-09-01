@@ -6,6 +6,7 @@ import {
   ArrowUp,
   Mail,
   Phone,
+  Package,
 } from 'lucide-react';
 import { BagCategory } from '../types';
 import { useStore } from '../store/StoreContext';
@@ -36,8 +37,8 @@ export const Footer: React.FC<FooterProps> = ({
         {/* Top Brand Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 pb-16 border-b border-zinc-200">
           
-          {/* Col 1: Brand Info (4 cols) */}
-          <div className="lg:col-span-4 space-y-5 text-left">
+          {/* Col 1: Brand Info (5 cols) */}
+          <div className="lg:col-span-5 space-y-5 text-left">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded bg-white border border-zinc-300 flex items-center justify-center shadow-sm overflow-hidden">
                 <img
@@ -89,8 +90,8 @@ export const Footer: React.FC<FooterProps> = ({
             </div>
           </div>
 
-          {/* Col 2: Collections (2 cols) */}
-          <div className="lg:col-span-2 space-y-4 text-left">
+          {/* Col 2: Collections (4 cols) */}
+          <div className="lg:col-span-4 space-y-4 text-left">
             <h4 className="text-xs font-mono uppercase tracking-[0.25em] text-zinc-900 font-bold">
               Silhouettes
             </h4>
@@ -122,48 +123,20 @@ export const Footer: React.FC<FooterProps> = ({
             </ul>
           </div>
 
-          {/* Col 3: Maison & Atelier (3 cols) */}
-          <div className="lg:col-span-3 space-y-4 text-left">
-            <h4 className="text-xs font-mono uppercase tracking-[0.25em] text-zinc-900 font-bold">
-              Maison & Atelier
-            </h4>
-            <ul className="space-y-2.5 text-xs text-zinc-600">
-              <li>
-                <button onClick={() => onNavigateSection('about-section')} className="hover:text-black transition-colors cursor-pointer">
-                  Héritage Florentin
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onNavigateSection('editorial-lookbook')} className="hover:text-black transition-colors cursor-pointer">
-                  Lookbook & Guide de Style
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onNavigateSection('brand-perks-section')} className="hover:text-black transition-colors cursor-pointer">
-                  Garantie à Vie & Entretien
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onNavigateSection('features-section')} className="hover:text-black transition-colors cursor-pointer">
-                  Bouclerie Titane Aérospatiale
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onNavigateSection('reviews-section')} className="hover:text-black transition-colors cursor-pointer">
-                  Reconnaissance Presse (Vogue / Bazaar)
-                </button>
-              </li>
-            </ul>
-          </div>
-
           {/* Col 4: Atelier Contacts (3 cols) */}
           <div className="lg:col-span-3 space-y-4 text-left">
             <h4 className="text-xs font-mono uppercase tracking-[0.25em] text-zinc-900 font-bold">
               Salon Florentin
             </h4>
             <ul className="space-y-3 text-xs text-zinc-600">
-              <li className="flex items-start gap-2.5">
-
+              <li className="mb-1">
+                <a
+                  href="#/track"
+                  className="inline-flex items-center gap-2.5 w-full sm:w-auto px-4 py-2.5 bg-black text-white text-xs font-bold uppercase tracking-widest rounded-full shadow-sm hover:bg-zinc-800 hover:shadow-md transition-all group"
+                >
+                  <Package className="w-4 h-4 shrink-0 group-hover:scale-110 transition-transform" />
+                  Suivre ma commande
+                </a>
               </li>
               <li className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-zinc-700 shrink-0" />
@@ -203,7 +176,7 @@ export const Footer: React.FC<FooterProps> = ({
             </button>
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4 sm:gap-6 flex-wrap justify-center sm:justify-start">
             <span className="flex items-center gap-1.5"><Lock className="w-3.5 h-3.5 text-zinc-700" /> SSL Sécurisé et Chiffré</span>
             <button
               onClick={scrollToTop}
@@ -214,6 +187,19 @@ export const Footer: React.FC<FooterProps> = ({
               <ArrowUp className="w-3.5 h-3.5" />
             </button>
           </div>
+        </div>
+
+        {/* Credit Line */}
+        <div className="mt-8 pt-6 border-t border-zinc-200 text-center text-xs text-zinc-500 font-mono">
+          Made with <span className="text-red-500">♥</span> by{' '}
+          <a
+            href="https://www.instagram.com/rd21.js/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-zinc-900 font-bold underline underline-offset-4 decoration-zinc-400 hover:text-black hover:decoration-black transition-colors"
+          >
+            rd21.js
+          </a>
         </div>
 
       </div>

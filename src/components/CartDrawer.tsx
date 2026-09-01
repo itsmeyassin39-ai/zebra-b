@@ -80,24 +80,26 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
           {/* Free Shipping Progress Bar */}
           <div className="px-6 py-3.5 bg-zinc-950/80 border-b border-zinc-800 text-left">
-            <div className="flex items-center justify-between text-xs mb-1.5">
-              <div className="flex items-center gap-1.5 text-zinc-300 font-mono text-[11px]">
-                <Truck className="w-3.5 h-3.5" />
+            <div className="flex items-center justify-between text-xs mb-1.5 gap-2 min-w-0">
+              <div className="flex items-center gap-1.5 text-zinc-300 font-mono text-[11px] min-w-0 flex-1">
+                <Truck className="w-3.5 h-3.5 shrink-0" />
+                <span className="min-w-0 flex-1">
                 {amountNeededForFreeShipping === 0 ? (
-                  <span className="text-white font-semibold">
-                    Livraison Express Gratuite partout au Maroc !
+                  <span className="text-white font-semibold leading-tight block">
+                    Livraison Express Gratuite au Maroc !
                   </span>
                 ) : (
-                  <span>
+                  <span className="leading-tight block">
                     Ajoutez{' '}
                     <strong className="text-white">
                       {formatPrice(amountNeededForFreeShipping, currentCurrency)}
                     </strong>{' '}
-                    de plus pour bénéficier de la Livraison Express Gratuite au Maroc
+                    de plus pour la Livraison Gratuite
                   </span>
                 )}
+                </span>
               </div>
-              <span className="text-[10px] font-mono text-zinc-400">
+              <span className="text-[10px] font-mono text-zinc-400 shrink-0">
                 {Math.round(freeShippingProgress)}%
               </span>
             </div>

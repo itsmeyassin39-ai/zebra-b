@@ -38,7 +38,6 @@ CREATE TABLE IF NOT EXISTS products (
   image_detail    TEXT,
   image_lifestyle TEXT,
   colors_json     TEXT NOT NULL DEFAULT '[]',
-  description     TEXT NOT NULL DEFAULT '',
   details_json    TEXT NOT NULL DEFAULT '[]',
   dimensions_json TEXT NOT NULL DEFAULT '{"width":30,"height":22,"depth":12,"unit":"cm"}',
   weight          TEXT NOT NULL DEFAULT '',
