@@ -129,15 +129,7 @@ export const Footer: React.FC<FooterProps> = ({
               Salon Florentin
             </h4>
             <ul className="space-y-3 text-xs text-zinc-600">
-              <li className="mb-1">
-                <a
-                  href="#/track"
-                  className="inline-flex items-center gap-2.5 w-full sm:w-auto px-4 py-2.5 bg-black text-white text-xs font-bold uppercase tracking-widest rounded-full shadow-sm hover:bg-zinc-800 hover:shadow-md transition-all group"
-                >
-                  <Package className="w-4 h-4 shrink-0 group-hover:scale-110 transition-transform" />
-                  Suivre ma commande
-                </a>
-              </li>
+              
               <li className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-zinc-700 shrink-0" />
                 <span>+212779440140</span>

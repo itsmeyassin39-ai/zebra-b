@@ -124,7 +124,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
               {/* Minimal Brand Wordmark */}
               <span className="font-display tracking-[0.22em] text-sm sm:text-base font-bold text-white uppercase group-hover:text-zinc-300 transition-colors">
-                ZEBRA
+                ZEBRA BAGS
               </span>
             </button>
           </div>
