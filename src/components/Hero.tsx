@@ -74,7 +74,7 @@ export const Hero: React.FC<HeroProps> = ({
       id="hero-section"
       className="relative min-h-screen flex items-center overflow-hidden bg-zinc-950"
       style={{
-        backgroundImage: "url('https://i.postimg.cc/YCtgK6CY/bggg-png-2K-202608290045.jpg')",
+        backgroundImage: "url('/assets/imgs/hero-bg.jpg')",
         backgroundSize: 'cover',
         backgroundPosition: 'center top',
         backgroundRepeat: 'no-repeat',
@@ -95,11 +95,11 @@ export const Hero: React.FC<HeroProps> = ({
           {/* Headline with clear separation from navbar */}
           <motion.div variants={itemVariants}>
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] xl:text-[4.85rem] font-sans font-bold text-white uppercase leading-[1.0] tracking-tight">
-              Votre <br />
-              Style.<br />
+              conçu<br />
+              Pour la concentration.<br />
               <span className="text-white/40 font-sans font-normal italic">
-               Votre Voyage<br />
-                Chez-Nous.
+               pensé<br />
+                Pour Nous.
               </span>
             </h1>
           </motion.div>

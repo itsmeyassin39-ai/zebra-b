@@ -61,16 +61,9 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
         {/* Header and Filter Tabs */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div className="space-y-3 text-left">
-            <div className="flex items-center gap-2 text-[11px] font-mono tracking-[0.3em] uppercase text-zinc-500">
-              <span className="w-6 h-px bg-zinc-400" />
-              <span>Catalogue Boutique</span>
-            </div>
-            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-zinc-900 uppercase">
-              Créations Vedettes
-            </h2>
-            <p className="text-sm text-zinc-600 max-w-xl font-light">
-              Explorez nos chefs-d'œuvre de maroquinerie monochrome, d'ingénierie de bouclerie et de design sculptural.
-            </p>
+            
+
+
           </div>
 
           {/* Filter Pills */}
