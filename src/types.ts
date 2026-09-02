@@ -25,6 +25,7 @@ export interface Product {
     hover: string;
     detail?: string;
     lifestyle?: string;
+    gallery?: string[];
   };
   colors: ProductColor[];
   details?: string[];
@@ -82,6 +83,7 @@ export interface CustomerReview {
   title: string;
   comment: string;
   productPurchased: string;
+  productId?: string;
   verified: boolean;
   avatarUrl?: string;
   role?: string;

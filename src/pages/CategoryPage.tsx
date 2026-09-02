@@ -208,6 +208,18 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
                         {formatPrice(product.price, currentCurrency)}
                       </span>
                     </div>
+
+                    {/* Product reviews are shown in the quick-view card. */}
+                    {/*
+                              <p className="text-[10px] text-zinc-400 font-mono">
+                                — {topReview.author}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+                    */}
                   </div>
                 </div>
               );

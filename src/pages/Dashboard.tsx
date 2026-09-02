@@ -15,6 +15,7 @@ import {
   ShoppingBag,
   Folder,
   ClipboardList,
+  MessageSquare,
   RefreshCw,
   ChevronDown,
   ChevronUp,
@@ -25,8 +26,9 @@ import {
   BellOff,
   Volume2,
   Sparkles,
+  Star,
 } from 'lucide-react';
-import { Product, CategoryInfo, ProductColor, Order, OrderStatus, Currency } from '../types';
+import { Product, CategoryInfo, ProductColor, Order, OrderStatus, Currency, CustomerReview } from '../types';
 import { useStore } from '../store/StoreContext';
 import { logout, getRememberedEmail, getToken } from '../store/auth';
 import { api } from '../api/client';
@@ -49,12 +51,13 @@ interface DashboardProps {
   onClose: () => void;
 }
 
-type TabId = 'products' | 'categories' | 'orders';
+type TabId = 'products' | 'categories' | 'orders' | 'reviews';
 
 const TABS: { id: TabId; label: string; icon: React.FC<{ className?: string }> }[] = [
   { id: 'products', label: 'Mes produits', icon: ShoppingBag },
   { id: 'categories', label: 'Mes catégories', icon: Folder },
   { id: 'orders', label: 'Mes commandes', icon: ClipboardList },
+  { id: 'reviews', label: 'Mes avis', icon: MessageSquare },
 ];
 
 const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
@@ -88,6 +91,7 @@ interface ProductFormState {
   hover: string;
   detail: string;
   lifestyle: string;
+  gallery: string[];
   colors: ProductColor[];
   material: string;
   lining: string;
@@ -116,6 +120,7 @@ const emptyProductForm = (categoryId: string, categoryName: string): ProductForm
   hover: '',
   detail: '',
   lifestyle: '',
+  gallery: [],
   colors: [{ name: '', hex: '#fafaf9', previewUrl: '' }],
   material: '',
   lining: '',
@@ -145,6 +150,7 @@ function productToForm(p: Product): ProductFormState {
     hover: p.images.hover,
     detail: p.images.detail ?? '',
     lifestyle: p.images.lifestyle ?? '',
+    gallery: (p.images.gallery ?? []).filter(Boolean),
     colors: p.colors.map((c) => ({ ...c })),
     material: p.material,
     lining: p.lining ?? '',
@@ -345,6 +351,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
         hover: productForm.hover.trim() || main,
         detail: productForm.detail.trim() || undefined,
         lifestyle: productForm.lifestyle.trim() || undefined,
+        gallery: productForm.gallery.filter(Boolean),
       },
       colors:
         productForm.colors.filter((c) => c.name.trim()).length > 0
@@ -680,6 +687,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
 
         {/* ================= COMMANDES ================= */}
         {tab === 'orders' && <OrdersTab liveOrder={liveOrder} />}
+
+        {/* ================= AVIS ================= */}
+        {tab === 'reviews' && <ReviewsTab />}
       </main>
 
       {/* ================= ÉDITEUR PRODUIT ================= */}
@@ -829,15 +839,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                     <input className={inputCls} value={productForm.lining} onChange={(e) => setProductForm((f) => ({ ...f, lining: e.target.value }))} placeholder="Ex : Cuir de veau microfibre" />
                   </div>
                   <div>
-                    <label className={labelCls}>Poids</label>
-                    <input className={inputCls} value={productForm.weight} onChange={(e) => setProductForm((f) => ({ ...f, weight: e.target.value }))} placeholder="Ex : 1,2 kg" />
-                  </div>
-                  <div>
                     <label className={labelCls}>Dimensions</label>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 gap-2">
                       <input type="number" min={0} className={inputCls} value={productForm.dimensions.width} onChange={(e) => setProductForm((f) => ({ ...f, dimensions: { ...f.dimensions, width: Number(e.target.value) } }))} placeholder="Larg." title="Largeur" />
                       <input type="number" min={0} className={inputCls} value={productForm.dimensions.height} onChange={(e) => setProductForm((f) => ({ ...f, dimensions: { ...f.dimensions, height: Number(e.target.value) } }))} placeholder="Haut." title="Hauteur" />
-                      <input type="number" min={0} className={inputCls} value={productForm.dimensions.depth} onChange={(e) => setProductForm((f) => ({ ...f, dimensions: { ...f.dimensions, depth: Number(e.target.value) } }))} placeholder="Prof." title="Profondeur" />
                     </div>
                     <input className={`${inputCls} mt-2`} value={productForm.dimensions.unit} onChange={(e) => setProductForm((f) => ({ ...f, dimensions: { ...f.dimensions, unit: e.target.value } }))} placeholder="cm" title="Unité" />
                   </div>
@@ -896,6 +901,48 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                           value={productForm.lifestyle}
                           onChange={(url) => setProductForm((f) => ({ ...f, lifestyle: url }))}
                         />
+                      </div>
+                      <div className="col-span-2">
+                        <span className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">
+                          Galerie photos (illimité)
+                        </span>
+                        <div className="flex flex-wrap gap-3">
+                          {productForm.gallery.map((url, gi) => (
+                            <div key={gi} className="relative">
+                              <img
+                                src={url}
+                                alt={`Galerie ${gi + 1}`}
+                                referrerPolicy="no-referrer"
+                                className="w-20 h-20 rounded-xl object-cover border border-zinc-200 bg-zinc-100"
+                              />
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setProductForm((f) => ({
+                                    ...f,
+                                    gallery: f.gallery.filter((_, idx) => idx !== gi),
+                                  }))
+                                }
+                                className="absolute -top-1.5 -right-1.5 p-1 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors cursor-pointer"
+                                title="Retirer"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ))}
+                          <ImageUploadField
+                            label=""
+                            compact
+                            value=""
+                            hint="Ajouter une photo"
+                            onChange={(url) =>
+                              setProductForm((f) => ({
+                                ...f,
+                                gallery: [...f.gallery, url].filter(Boolean),
+                              }))
+                            }
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1562,6 +1609,305 @@ const OrdersTab: React.FC<{ liveOrder: Order | null }> = ({ liveOrder }) => {
 
               </div>
 
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+};
+
+const ReviewsTab: React.FC = () => {
+  const { products, customerReviews, addCustomerReview, updateCustomerReview, deleteCustomerReview } = useStore();
+  const [editing, setEditing] = useState<CustomerReview | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [msg, setMsg] = useState('');
+
+  const flash = (m: string) => {
+    setMsg(m);
+    window.setTimeout(() => setMsg(''), 3000);
+  };
+
+  const emptyForm: Omit<CustomerReview, 'id'> = {
+    author: '',
+    location: '',
+    rating: 5,
+    date: new Date().toISOString().slice(0, 10),
+    title: '',
+    comment: '',
+    productPurchased: '',
+    productId: '',
+    verified: true,
+  };
+
+  const [form, setForm] = useState(emptyForm);
+
+  const openNew = () => {
+    setEditing(null);
+    setForm(emptyForm);
+    setIsFormOpen(true);
+  };
+
+  const openEdit = (r: CustomerReview) => {
+    setEditing(r);
+    setForm({
+      author: r.author,
+      location: r.location,
+      rating: r.rating,
+      date: r.date,
+      title: r.title,
+      comment: r.comment,
+      productPurchased: r.productPurchased,
+      productId: r.productId ?? '',
+      verified: r.verified,
+    });
+    setIsFormOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!form.author.trim() || !form.title.trim()) return;
+    if (editing) {
+      await updateCustomerReview(editing.id, form);
+      flash('Avis modifié ✓');
+    } else {
+      const review: CustomerReview = {
+        id: `rev-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        ...form,
+      };
+      await addCustomerReview(review);
+      flash('Avis ajouté ✓');
+    }
+    setIsFormOpen(false);
+    setEditing(null);
+  };
+
+  const handleDelete = async (r: CustomerReview) => {
+    if (!window.confirm(`Supprimer l'avis de ${r.author} ?`)) return;
+    await deleteCustomerReview(r.id);
+    flash('Avis supprimé');
+  };
+
+  const selectedProduct = products.find((p) => p.id === form.productId);
+
+  return (
+    <section>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div className="text-zinc-600">
+          <span className="font-bold">{customerReviews.length}</span> avis
+        </div>
+        <button onClick={openNew} className={btnPrimary}>
+          <Plus className="w-4 h-4" />
+          Ajouter un avis
+        </button>
+      </div>
+
+      {msg && (
+        <div className="mb-4 px-4 py-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-bold">
+          {msg}
+        </div>
+      )}
+
+      {/* Form Panel */}
+      {isFormOpen && (
+        <div className="mb-6 bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
+            <h3 className="font-bold text-sm text-zinc-900">
+              {editing ? 'Modifier l\'avis' : 'Nouvel avis'}
+            </h3>
+            <button onClick={() => { setIsFormOpen(false); setEditing(null); }} className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors cursor-pointer">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Product */}
+            <div className="sm:col-span-2">
+              <label className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block mb-1.5">Produit</label>
+              <select
+                value={form.productId ?? ''}
+                onChange={(e) => {
+                  const pid = e.target.value;
+                  const prod = products.find((p) => p.id === pid);
+                  setForm({ ...form, productId: pid, productPurchased: prod?.name ?? '' });
+                }}
+                className="w-full rounded-xl border border-zinc-200 bg-white text-sm px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-black focus:border-black cursor-pointer"
+              >
+                <option value="">— Sélectionner un produit —</option>
+                {products.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Author */}
+            <div>
+              <label className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block mb-1.5">Auteur</label>
+              <input
+                type="text"
+                value={form.author}
+                onChange={(e) => setForm({ ...form, author: e.target.value })}
+                placeholder="Nom du client"
+                className="w-full rounded-xl border border-zinc-200 bg-white text-sm px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
+              />
+            </div>
+
+            {/* Location */}
+            <div>
+              <label className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block mb-1.5">Ville</label>
+              <input
+                type="text"
+                value={form.location}
+                onChange={(e) => setForm({ ...form, location: e.target.value })}
+                placeholder="Casablanca, Maroc"
+                className="w-full rounded-xl border border-zinc-200 bg-white text-sm px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
+              />
+            </div>
+
+            {/* Rating */}
+            <div>
+              <label className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block mb-1.5">Note</label>
+              <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setForm({ ...form, rating: s })}
+                    className="cursor-pointer"
+                  >
+                    <Star className={`w-6 h-6 transition-colors ${s <= form.rating ? 'text-amber-400 fill-amber-400' : 'text-zinc-200'}`} />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Title */}
+            <div>
+              <label className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block mb-1.5">Titre</label>
+              <input
+                type="text"
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                placeholder="Titre de l'avis"
+                className="w-full rounded-xl border border-zinc-200 bg-white text-sm px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
+              />
+            </div>
+
+            {/* Date */}
+            <div>
+              <label className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block mb-1.5">Date</label>
+              <input
+                type="date"
+                value={form.date}
+                onChange={(e) => setForm({ ...form, date: e.target.value })}
+                className="w-full rounded-xl border border-zinc-200 bg-white text-sm px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
+              />
+            </div>
+
+            {/* Comment */}
+            <div className="sm:col-span-2">
+              <label className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block mb-1.5">Commentaire</label>
+              <textarea
+                rows={3}
+                value={form.comment}
+                onChange={(e) => setForm({ ...form, comment: e.target.value })}
+                placeholder="Texte de l'avis client..."
+                className="w-full rounded-xl border border-zinc-200 bg-white text-sm px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-black focus:border-black resize-none"
+              />
+            </div>
+
+            {/* Verified */}
+            <div className="sm:col-span-2">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.verified}
+                  onChange={(e) => setForm({ ...form, verified: e.target.checked })}
+                  className="w-4 h-4 rounded border-zinc-300 text-black focus:ring-black cursor-pointer"
+                />
+                <span className="text-sm text-zinc-700">Avis vérifié</span>
+              </label>
+            </div>
+          </div>
+
+          <div className="px-6 py-4 border-t border-zinc-100 flex items-center justify-end gap-3">
+            <button onClick={() => { setIsFormOpen(false); setEditing(null); }} className={btnSecondary}>
+              Annuler
+            </button>
+            <button onClick={handleSave} className={btnPrimary}>
+              <Save className="w-4 h-4" />
+              {editing ? 'Enregistrer' : 'Publier l\'avis'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Reviews List */}
+      {customerReviews.length === 0 ? (
+        <div className="text-center py-24 bg-white rounded-2xl border border-zinc-200">
+          <MessageSquare className="w-10 h-10 text-zinc-300 mx-auto mb-3" />
+          <p className="text-zinc-500">Aucun avis pour le moment.</p>
+          <p className="text-xs text-zinc-400 mt-1">
+            Ajoutez des avis pour les afficher sur vos fiches produit.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {customerReviews.map((r) => (
+            <div key={r.id} className="bg-white rounded-xl border border-zinc-100 p-5 flex items-start gap-4 hover:shadow-sm transition-shadow">
+              {/* Avatar / Initials */}
+              <div className="w-10 h-10 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0">
+                <span className="text-sm font-bold text-zinc-600">
+                  {r.author.charAt(0).toUpperCase()}
+                </span>
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-bold text-sm text-zinc-900">{r.author}</span>
+                  {r.verified && (
+                    <span className="flex items-center gap-0.5 text-[10px] text-emerald-600 font-mono">
+                      <CheckCircle2 className="w-3 h-3" />
+                      Vérifié
+                    </span>
+                  )}
+                  <span className="text-[10px] text-zinc-400 font-mono ml-auto">{r.date}</span>
+                </div>
+                <div className="flex items-center gap-1 mb-1">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className={`w-3 h-3 ${i < r.rating ? 'text-amber-400 fill-amber-400' : 'text-zinc-200'}`} />
+                  ))}
+                </div>
+                <p className="font-semibold text-xs text-zinc-800">{r.title}</p>
+                <p className="text-xs text-zinc-500 mt-0.5 line-clamp-2">{r.comment}</p>
+                <div className="flex items-center gap-2 mt-2">
+                  {r.productPurchased && (
+                    <span className="text-[10px] font-mono text-zinc-400 bg-zinc-50 border border-zinc-100 px-2 py-0.5 rounded">
+                      {r.productPurchased}
+                    </span>
+                  )}
+                  {r.location && (
+                    <span className="text-[10px] font-mono text-zinc-400">{r.location}</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-1 shrink-0">
+                <button
+                  onClick={() => openEdit(r)}
+                  className="p-1.5 rounded-lg text-zinc-400 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+                  title="Modifier"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => handleDelete(r)}
+                  className="p-1.5 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                  title="Supprimer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           ))}
         </div>

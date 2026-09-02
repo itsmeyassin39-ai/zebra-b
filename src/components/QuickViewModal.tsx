@@ -8,9 +8,11 @@ import {
   ChevronLeft,
   ChevronRight,
   Check,
+  Star,
 } from 'lucide-react';
 import { Product, Currency } from '../types';
 import { formatPrice } from '../utils/formatters';
+import { useStore } from '../store/StoreContext';
 
 interface QuickViewModalProps {
   product: Product | null;
@@ -35,9 +37,11 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
   onAddToCart,
   onToggleWishlist,
 }) => {
+  const { customerReviews } = useStore();
+
   if (!product) return null;
 
-  const [activeImageKey, setActiveImageKey] = useState<'main' | 'hover' | 'detail' | 'lifestyle'>('main');
+  const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [selectedColorIdx, setSelectedColorIdx] = useState(0);
   const [selectedHardware, setSelectedHardware] = useState(product.hardware.split(' or ')[0] || 'Argent brossé Palladium');
   const [quantity, setQuantity] = useState(1);
@@ -52,6 +56,11 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
     ...(product.images.lifestyle
       ? [{ key: 'lifestyle' as const, label: 'Modèle Éditorial', url: product.images.lifestyle }]
       : []),
+    ...(product.images.gallery ?? []).map((url, i) => ({
+      key: `gallery-${i}` as const,
+      label: `Photo ${i + 1}`,
+      url,
+    })),
   ];
 
   const handleAdd = () => {
@@ -61,6 +70,12 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
       setIsAdded(false);
     }, 2000);
   };
+
+  const productReviews = customerReviews.filter((review) => review.productId === product.id);
+  const averageRating = productReviews.length
+    ? productReviews.reduce((total, review) => total + review.rating, 0) / productReviews.length
+    : null;
+  const featuredReview = productReviews[0];
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -92,7 +107,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
             {/* Big Active Image */}
             <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-black border border-zinc-800 flex items-center justify-center">
               <img
-                src={product.images[activeImageKey]}
+                src={imagesList[activeImageIdx]?.url ?? product.images.main}
                 alt={product.name}
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover object-center"
@@ -104,9 +119,8 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
               {/* Image Navigation Arrows */}
               <button
                 onClick={() => {
-                  const currIdx = imagesList.findIndex((i) => i.key === activeImageKey);
-                  const prevIdx = currIdx === 0 ? imagesList.length - 1 : currIdx - 1;
-                  setActiveImageKey(imagesList[prevIdx].key);
+                  const prevIdx = activeImageIdx === 0 ? imagesList.length - 1 : activeImageIdx - 1;
+                  setActiveImageIdx(prevIdx);
                 }}
                 className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/60 hover:bg-black text-white"
               >
@@ -114,9 +128,8 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
               </button>
               <button
                 onClick={() => {
-                  const currIdx = imagesList.findIndex((i) => i.key === activeImageKey);
-                  const nextIdx = (currIdx + 1) % imagesList.length;
-                  setActiveImageKey(imagesList[nextIdx].key);
+                  const nextIdx = (activeImageIdx + 1) % imagesList.length;
+                  setActiveImageIdx(nextIdx);
                 }}
                 className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/60 hover:bg-black text-white"
               >
@@ -126,12 +139,12 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
 
             {/* Thumbnail Selectors */}
             <div className={`grid gap-3 mt-4 ${imagesList.length === 2 ? 'grid-cols-2' : imagesList.length === 3 ? 'grid-cols-3' : 'grid-cols-4'}`}>
-              {imagesList.map((img) => (
+              {imagesList.map((img, i) => (
                 <button
                   key={img.key}
-                  onClick={() => setActiveImageKey(img.key)}
+                  onClick={() => setActiveImageIdx(i)}
                   className={`aspect-square rounded-lg overflow-hidden border transition-all cursor-pointer ${
-                    activeImageKey === img.key
+                    activeImageIdx === i
                       ? 'border-white ring-2 ring-white/40 scale-102'
                       : 'border-zinc-800 opacity-60 hover:opacity-100'
                   }`}
@@ -175,7 +188,9 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                       {formatPrice(product.originalPrice, currentCurrency)}
                     </span>
                   )}
-                  <span className="text-xs text-zinc-400 font-mono">★ {product.rating} ({product.reviewsCount} avis)</span>
+                  <span className="text-xs text-zinc-400 font-mono">
+                    ★ {averageRating !== null ? averageRating.toFixed(1) : '—'} ({productReviews.length} avis)
+                  </span>
                 </div>
               </div>
 
@@ -192,12 +207,8 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                 <div className="rounded-xl bg-zinc-900/60 border border-zinc-800 p-3">
                   <span className="block text-[9px] font-mono uppercase tracking-widest text-zinc-500">Dimensions</span>
                   <span className="block text-xs text-zinc-200 mt-1">
-                    {product.dimensions.width} × {product.dimensions.height} × {product.dimensions.depth} {product.dimensions.unit}
+                    {product.dimensions.width} × {product.dimensions.height} {product.dimensions.unit}
                   </span>
-                </div>
-                <div className="rounded-xl bg-zinc-900/60 border border-zinc-800 p-3">
-                  <span className="block text-[9px] font-mono uppercase tracking-widest text-zinc-500">Poids</span>
-                  <span className="block text-xs text-zinc-200 mt-1">{product.weight}</span>
                 </div>
               </div>
               </div>
@@ -270,6 +281,40 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                   <ShieldCheck className="w-3 h-3 text-zinc-300 shrink-0" /> Garantie à Vie
                 </span>
               </div>
+
+              {featuredReview && averageRating !== null && (
+                <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-3 space-y-2.5">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[9px] font-mono uppercase tracking-[0.18em] text-zinc-400">
+                      Avis clients
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <div className="flex gap-0.5" aria-label={`Note moyenne : ${averageRating.toFixed(1)} sur 5`}>
+                        {[...Array(5)].map((_, index) => (
+                          <Star
+                            key={index}
+                            className={`w-3 h-3 ${
+                              index < Math.round(averageRating)
+                                ? 'fill-amber-400 text-amber-400'
+                                : 'text-zinc-700'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-[10px] font-mono text-zinc-400">
+                        {averageRating.toFixed(1)} ({productReviews.length})
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-zinc-100 line-clamp-1">{featuredReview.title}</p>
+                    <p className="mt-1 text-[11px] leading-relaxed text-zinc-400 line-clamp-2">
+                      {featuredReview.comment}
+                    </p>
+                    <p className="mt-1.5 text-[10px] font-mono text-zinc-500">— {featuredReview.author}</p>
+                  </div>
+                </div>
+              )}
             </div>
 
           </div>

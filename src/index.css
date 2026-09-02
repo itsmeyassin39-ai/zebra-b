@@ -43,6 +43,22 @@
   }
 }
 
+/* Selection — outside @layer so Tailwind preflight can't override */
+::selection {
+  background-color: #d4d4d8 !important;
+  color: #000000 !important;
+}
+
+* {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+}
+
+button, a, [role="button"] {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
 .font-display {
   font-family: var(--font-cinzel);
 }

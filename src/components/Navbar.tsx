@@ -110,7 +110,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               id="brand-logo-button"
               onClick={() => handleNavClick('home')}
-              className="inline-flex items-center gap-2.5 group cursor-pointer focus:outline-none select-none text-left"
+              className="inline-flex items-center gap-2.5 group cursor-pointer focus:outline-none text-left"
               aria-label="Accueil Zebra"
             >
               {/* Zebra Logo Image */}

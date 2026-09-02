@@ -198,6 +198,7 @@ function rowToProduct(row: Record<string, any>): Product {
       hover: row.image_hover,
       detail: row.image_detail || undefined,
       lifestyle: row.image_lifestyle || undefined,
+      gallery: parseJson<string[]>(row.image_gallery, []),
     },
     colors: parseJson<ProductColor[]>(row.colors_json, []),
     details: parseJson<string[]>(row.details_json, undefined),
@@ -217,11 +218,11 @@ function productRow(p: Product): { sql: string; args: SqlArgs } {
     sql: `INSERT OR REPLACE INTO products (
       id, name, tagline, category, category_name, price, original_price, rating,
       reviews_count, is_new, is_best_seller, is_limited, stock_count,
-      image_main, image_hover, image_detail, image_lifestyle,
+      image_main, image_hover, image_detail, image_lifestyle, image_gallery,
       colors_json, details_json, dimensions_json, weight, material,
       lining, hardware, strap_drop, features_json, zebra_accent_style
     ) VALUES (
-      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
     )`,
     args: [
       p.id,
@@ -241,6 +242,7 @@ function productRow(p: Product): { sql: string; args: SqlArgs } {
       p.images.hover,
       p.images.detail ?? null,
       p.images.lifestyle ?? null,
+      JSON.stringify(p.images.gallery ?? []),
       JSON.stringify(p.colors),
       JSON.stringify(p.details ?? []),
       JSON.stringify(p.dimensions),
@@ -281,7 +283,7 @@ function postRow(p: InstagramPost): { sql: string; args: SqlArgs } {
 
 function reviewRow(r: CustomerReview): { sql: string; args: SqlArgs } {
   return {
-    sql: 'INSERT OR REPLACE INTO customer_reviews (id, author, location, rating, date, title, comment, product_purchased, verified, avatar_url, role, company) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    sql: 'INSERT OR REPLACE INTO customer_reviews (id, author, location, rating, date, title, comment, product_purchased, verified, avatar_url, role, company, product_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     args: [
       r.id,
       r.author,
@@ -295,6 +297,7 @@ function reviewRow(r: CustomerReview): { sql: string; args: SqlArgs } {
       r.avatarUrl ?? '',
       r.role ?? '',
       r.company ?? '',
+      r.productId ?? '',
     ],
   };
 }
@@ -387,6 +390,7 @@ async function fetchAll(): Promise<{ products: Product[]; categories: CategoryIn
       title: String(r.title),
       comment: String(r.comment),
       productPurchased: String(r.product_purchased),
+      productId: (r.product_id as string) || undefined,
       verified: !!r.verified,
       avatarUrl: (r.avatar_url as string) || undefined,
       role: (r.role as string) || undefined,
@@ -403,6 +407,10 @@ async function seed(): Promise<void> {
       hashPassword('zebra2026'),
     ]);
   }
+
+  // Migrations: add columns that may be missing on older databases
+  try { await db.run("ALTER TABLE customer_reviews ADD COLUMN product_id TEXT NOT NULL DEFAULT ''", []); } catch { /* already exists */ }
+  try { await db.run("ALTER TABLE products ADD COLUMN image_gallery TEXT NOT NULL DEFAULT '[]'", []); } catch { /* already exists */ }
 
   const count = await db.all('SELECT COUNT(*) AS c FROM products', []);
   if (Number(count[0]?.c ?? 0) > 0) return;
@@ -750,6 +758,7 @@ app.put('/api/reviews/:id', requireAuth(async (req, res) => {
     title: patch.title ?? (cur.title as string),
     comment: patch.comment ?? (cur.comment as string),
     productPurchased: patch.productPurchased ?? (cur.product_purchased as string),
+    productId: patch.productId ?? ((cur.product_id as string) || undefined),
     verified: patch.verified ?? !!cur.verified,
     avatarUrl: patch.avatarUrl ?? ((cur.avatar_url as string) || undefined),
     role: patch.role !== undefined ? patch.role : ((cur.role as string) || undefined),
