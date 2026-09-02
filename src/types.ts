@@ -122,6 +122,7 @@ export interface OrderItem {
   color: string;
   hardware: string;
   monogram?: string;
+  image?: string;
 }
 
 export type OrderStatus = 'nouvelle' | 'en_cours' | 'expediee' | 'livree';

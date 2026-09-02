@@ -1431,89 +1431,137 @@ const OrdersTab: React.FC<{ liveOrder: Order | null }> = ({ liveOrder }) => {
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-5">
           {orders.map((o) => (
-            <div key={o.id} className="bg-white rounded-xl border border-zinc-100 overflow-hidden">
-              {/* Header */}
-              <div className="px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3">
+            <div key={o.id} className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+
+              {/* Header Bar */}
+              <div className="px-5 py-3.5 border-b border-zinc-100 flex flex-col sm:flex-row sm:items-center gap-3">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <span className={`shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wide ${ORDER_STATUS_STYLES[o.status] ?? 'bg-zinc-100 text-zinc-700'}`}>
+                  <span className={`shrink-0 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide ${ORDER_STATUS_STYLES[o.status] ?? 'bg-zinc-100 text-zinc-700'}`}>
                     {ORDER_STATUS_LABELS[o.status] ?? o.status}
                   </span>
                   <div className="min-w-0">
-                    <p className="font-semibold text-sm text-zinc-900 truncate">
+                    <p className="font-mono font-bold text-sm text-zinc-900">{o.id}</p>
+                    <p className="text-[11px] text-zinc-400">{formatDate(o.createdAt)}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 sm:ml-auto shrink-0">
+                  <div className="text-right">
+                    <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Total</p>
+                    <p className="font-mono font-bold text-base text-zinc-900">
+                      {formatPrice(o.total, o.currency as Currency)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Customer + Items Grid */}
+              <div className="px-5 py-5 grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+                {/* Left: Customer Info */}
+                <div className="lg:col-span-3 space-y-3">
+                  <div>
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 mb-1">Client</p>
+                    <p className="font-semibold text-sm text-zinc-900">
                       {[o.customer.firstName, o.customer.lastName].filter(Boolean).join(' ')}
                     </p>
-                    <p className="text-xs text-zinc-400 font-mono">{formatDate(o.createdAt)}</p>
                   </div>
-                </div>
-                <div className="flex items-center gap-2 sm:ml-auto shrink-0">
-                  <span className="font-mono font-bold text-sm text-zinc-900">
-                    {formatPrice(o.total, o.currency as Currency)}
-                  </span>
-                  <select
-                    value={o.status}
-                    onChange={(e) => changeStatus(o.id, e.target.value as OrderStatus)}
-                    className="rounded-lg border border-zinc-200 bg-white text-xs text-zinc-700 px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-black cursor-pointer"
-                  >
-                    {(Object.keys(ORDER_STATUS_LABELS) as OrderStatus[]).map((s) => (
-                      <option key={s} value={s}>{ORDER_STATUS_LABELS[s]}</option>
-                    ))}
-                  </select>
-                  <button
-                    onClick={() => removeOrder(o)}
-                    className="p-1.5 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
-                    title="Supprimer"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Details */}
-              <div className="border-t border-zinc-50 px-5 py-4 grid grid-cols-1 sm:grid-cols-3 gap-4 bg-zinc-50/50 text-xs text-zinc-600">
-                {/* Contact */}
-                <div className="space-y-1">
-                  <p className="text-zinc-800 font-semibold">{o.customer.phone}</p>
-                  <p className="text-zinc-500">{[o.customer.city, o.customer.address].filter(Boolean).join(' — ')}</p>
-                  <p className="text-zinc-400 uppercase tracking-wide text-[10px]">
+                  <div className="space-y-1.5">
+                    <p className="text-xs text-zinc-600">{o.customer.phone}</p>
+                    <p className="text-xs text-zinc-500">{[o.customer.city, o.customer.address].filter(Boolean).join(' — ')}</p>
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-100 text-[10px] font-medium text-zinc-600 uppercase tracking-wide">
                     {o.customer.paymentMethod || 'Livraison'}
-                  </p>
+                  </div>
                 </div>
 
-                {/* Articles */}
-                <div className="space-y-1">
-                  {o.items.map((it, i) => (
-                    <div key={i} className="flex justify-between gap-2">
-                      <span className="truncate text-zinc-600">{it.quantity}× {it.name}</span>
-                      <span className="font-mono shrink-0 text-zinc-900 font-medium">
-                        {formatPrice(it.price * it.quantity, o.currency as Currency)}
-                      </span>
-                    </div>
-                  ))}
+                {/* Middle: Product Items */}
+                <div className="lg:col-span-6">
+                  <p className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 mb-3">Articles</p>
+                  <div className="space-y-3">
+                    {o.items.map((it, i) => (
+                      <div key={i} className="flex items-center gap-4 p-2.5 rounded-xl bg-zinc-50 border border-zinc-100">
+                        {it.image ? (
+                          <img
+                            src={it.image}
+                            alt={it.name}
+                            referrerPolicy="no-referrer"
+                            className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border border-zinc-200 shrink-0 bg-zinc-100"
+                          />
+                        ) : (
+                          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-zinc-100 border border-zinc-200 shrink-0 flex items-center justify-center">
+                            <ShoppingBag className="w-5 h-5 text-zinc-300" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-sm text-zinc-900 truncate">{it.name}</p>
+                          <p className="text-[11px] text-zinc-500 mt-0.5">{it.color}{it.hardware ? ` · ${it.hardware}` : ''}</p>
+                          {it.monogram && (
+                            <p className="text-[11px] text-zinc-400 italic mt-0.5">Monogramme : {it.monogram}</p>
+                          )}
+                          <div className="flex items-center justify-between mt-1.5">
+                            <span className="text-[11px] text-zinc-400">Qté : {it.quantity}</span>
+                            <span className="font-mono text-sm font-bold text-zinc-900">
+                              {formatPrice(it.price * it.quantity, o.currency as Currency)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                   {o.giftNote && (
-                    <p className="text-zinc-400 italic text-[11px]">🎁 {o.giftNote}</p>
+                    <p className="text-zinc-400 italic text-[11px] mt-3 px-1">🎁 {o.giftNote}</p>
                   )}
                 </div>
 
-                {/* Total breakdown */}
-                <div className="space-y-1">
-                  {o.discountPercent > 0 && (
-                    <div className="flex justify-between text-emerald-600">
-                      <span>Réduction {o.discountPercent}%</span>
-                      <span className="font-mono">-{formatPrice((o.subtotal * o.discountPercent) / 100, o.currency as Currency)}</span>
+                {/* Right: Summary & Actions */}
+                <div className="lg:col-span-3 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 mb-1">Récapitulatif</p>
+                    <div className="flex justify-between text-xs text-zinc-500">
+                      <span>Sous-total</span>
+                      <span className="font-mono">{formatPrice(o.subtotal, o.currency as Currency)}</span>
                     </div>
-                  )}
-                  <div className="flex justify-between">
-                    <span>Livraison</span>
-                    <span className="font-mono">{o.shipping === 0 ? 'Offerte' : formatPrice(o.shipping, o.currency as Currency)}</span>
+                    {o.discountPercent > 0 && (
+                      <div className="flex justify-between text-xs text-emerald-600">
+                        <span>Réduction {o.discountPercent}%</span>
+                        <span className="font-mono">-{formatPrice((o.subtotal * o.discountPercent) / 100, o.currency as Currency)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between text-xs text-zinc-500">
+                      <span>Livraison</span>
+                      <span className="font-mono">{o.shipping === 0 ? 'Offerte' : formatPrice(o.shipping, o.currency as Currency)}</span>
+                    </div>
+                    <div className="flex justify-between font-bold text-sm text-zinc-900 pt-2 border-t border-zinc-200">
+                      <span>Total</span>
+                      <span className="font-mono">{formatPrice(o.total, o.currency as Currency)}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between font-bold text-zinc-900 pt-1 border-t border-zinc-200">
-                    <span>Total</span>
-                    <span className="font-mono">{formatPrice(o.total, o.currency as Currency)}</span>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2 mt-5 pt-4 border-t border-zinc-100">
+                    <select
+                      value={o.status}
+                      onChange={(e) => changeStatus(o.id, e.target.value as OrderStatus)}
+                      className="flex-1 rounded-xl border border-zinc-200 bg-white text-xs text-zinc-700 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-black focus:border-black cursor-pointer font-medium"
+                    >
+                      {(Object.keys(ORDER_STATUS_LABELS) as OrderStatus[]).map((s) => (
+                        <option key={s} value={s}>{ORDER_STATUS_LABELS[s]}</option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => removeOrder(o)}
+                      className="p-2.5 rounded-xl border border-zinc-200 text-zinc-400 hover:text-red-500 hover:bg-red-50 hover:border-red-200 transition-colors cursor-pointer shrink-0"
+                      title="Supprimer"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
+
               </div>
+
             </div>
           ))}
         </div>

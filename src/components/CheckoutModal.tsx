@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   X,
   ShieldCheck,
@@ -47,6 +47,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [orderId, setOrderId] = useState('');
+  const [finalTotals, setFinalTotals] = useState<{ subtotal: number; discount: number; total: number } | null>(null);
 
   if (!isOpen) return null;
 
@@ -56,7 +57,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   );
   const discountAmount = (rawSubtotal * appliedDiscountPercent) / 100;
   const shippingFee = 0;
-  const grandTotal = Math.max(0, rawSubtotal - discountAmount + shippingFee);
+  const grandTotal = finalTotals?.total ?? Math.max(0, rawSubtotal - discountAmount + shippingFee);
+  const displaySubtotal = finalTotals?.subtotal ?? rawSubtotal;
+  const displayDiscount = finalTotals?.discount ?? discountAmount;
 
   const handleSubmitOrder = (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,6 +68,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     }
 
     setIsProcessing(true);
+    setFinalTotals({ subtotal: rawSubtotal, discount: discountAmount, total: grandTotal });
 
     setTimeout(async () => {
       const generatedId = `ZB-2026-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -96,6 +100,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           color: it.selectedColor.name,
           hardware: it.selectedHardware,
           monogram: it.personalizedMonogram,
+          image: it.product.images.main,
         })),
         subtotal: rawSubtotal,
         discountPercent: appliedDiscountPercent,
@@ -325,14 +330,14 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   <div className="flex items-center justify-between">
                     <span>Sous-total</span>
                     <span className="font-mono text-white">
-                      {formatPrice(rawSubtotal, currentCurrency)}
+                      {formatPrice(displaySubtotal, currentCurrency)}
                     </span>
                   </div>
                   {appliedDiscountPercent > 0 && (
                     <div className="flex items-center justify-between text-emerald-400">
                       <span>Réduction ({appliedDiscountPercent}%)</span>
                       <span className="font-mono">
-                        -{formatPrice(discountAmount, currentCurrency)}
+                        -{formatPrice(displayDiscount, currentCurrency)}
                       </span>
                     </div>
                   )}
