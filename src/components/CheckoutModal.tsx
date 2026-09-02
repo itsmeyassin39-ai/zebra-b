@@ -140,7 +140,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
       <div
         id="checkout-modal-card"
-        className="relative z-10 max-w-3xl w-full bg-[#111114] border border-zinc-700/80 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden text-white my-8 animate-in zoom-in-95 duration-200"
+        className="relative z-10 max-w-3xl w-full max-h-[90vh] flex flex-col bg-[#111114] border border-zinc-700/80 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden text-white my-8 animate-in zoom-in-95 duration-200"
       >
         {/* Header */}
         <div className="p-5 sm:p-6 border-b border-zinc-800 flex items-center justify-between bg-zinc-950">
@@ -170,7 +170,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
         {/* Content */}
         {!isCompleted ? (
-          <form onSubmit={handleSubmitOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-0">
+          <form onSubmit={handleSubmitOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-0 overflow-y-auto flex-1 min-h-0">
             
             {/* Left Column: Essential Customer & Delivery Info (7 cols) */}
             <div className="lg:col-span-7 p-6 sm:p-8 space-y-5 text-left border-b lg:border-b-0 lg:border-r border-zinc-800">
@@ -380,7 +380,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           </form>
         ) : (
           /* Order Confirmation Screen */
-          <div className="p-8 sm:p-12 text-center space-y-6 animate-in zoom-in-95 duration-300">
+          <div className="p-8 sm:p-12 text-center space-y-6 animate-in zoom-in-95 duration-300 overflow-y-auto flex-1 min-h-0">
             <div className="w-16 h-16 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto shadow-2xl">
               <Check className="w-8 h-8" />
             </div>
