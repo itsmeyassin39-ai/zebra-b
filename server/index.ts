@@ -8,7 +8,7 @@ import webpush from 'web-push';
 import { openDb, generateToken } from './db';
 import type { Db } from './db';
 import { PRODUCTS, CATEGORIES, INSTAGRAM_POSTS } from '../src/data/products';
-import type { Product, CategoryInfo, InstagramPost, ProductColor, Order, OrderCustomer, CustomerReview } from '../src/types';
+import type { Product, CategoryInfo, InstagramPost, ProductColor, Order, OrderCustomer, CustomerReview, WhatsAppPicture } from '../src/types';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, '..');
@@ -94,6 +94,12 @@ const DDL = [
     product_tagged_name TEXT NOT NULL DEFAULT '',
     product_tagged_price REAL NOT NULL DEFAULT 0,
     product_id TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`,
+  `CREATE TABLE IF NOT EXISTS whatsapp_pictures (
+    id TEXT PRIMARY KEY,
+    image_url TEXT NOT NULL DEFAULT '',
+    caption TEXT NOT NULL DEFAULT '',
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   )`,
   `CREATE TABLE IF NOT EXISTS customer_reviews (
@@ -352,13 +358,15 @@ const selectProducts = 'SELECT * FROM products ORDER BY created_at DESC, rowid D
 const selectCategories = 'SELECT * FROM categories';
 const selectPosts = 'SELECT * FROM instagram_posts';
 const selectReviews = 'SELECT * FROM customer_reviews ORDER BY created_at DESC, rowid DESC';
+const selectWhatsApp = 'SELECT * FROM whatsapp_pictures ORDER BY created_at DESC, rowid DESC';
 
-async function fetchAll(): Promise<{ products: Product[]; categories: CategoryInfo[]; instagramPosts: InstagramPost[]; customerReviews: CustomerReview[] }> {
-  const [productsRes, categoriesRes, postsRes, reviewsRes] = await Promise.all([
+async function fetchAll(): Promise<{ products: Product[]; categories: CategoryInfo[]; instagramPosts: InstagramPost[]; customerReviews: CustomerReview[]; whatsappPictures: WhatsAppPicture[] }> {
+  const [productsRes, categoriesRes, postsRes, reviewsRes, whatsappRes] = await Promise.all([
     db.all(selectProducts, []),
     db.all(selectCategories, []),
     db.all(selectPosts, []),
     db.all(selectReviews, []),
+    db.all(selectWhatsApp, []),
   ]);
   return {
     products: productsRes.map((r) => rowToProduct(r)),
@@ -395,6 +403,12 @@ async function fetchAll(): Promise<{ products: Product[]; categories: CategoryIn
       avatarUrl: (r.avatar_url as string) || undefined,
       role: (r.role as string) || undefined,
       company: (r.company as string) || undefined,
+    })),
+    whatsappPictures: whatsappRes.map((r) => ({
+      id: String(r.id),
+      imageUrl: String(r.image_url),
+      caption: (r.caption as string) || undefined,
+      createdAt: String(r.created_at),
     })),
   };
 }
@@ -774,9 +788,28 @@ app.delete('/api/reviews/:id', requireAuth(async (req, res) => {
   res.json({ id: req.params.id });
 }));
 
+// WhatsApp pictures (captures / screenshots de commandes clients)
+app.post('/api/whatsapp', requireAuth(async (req, res) => {
+  const p = req.body as WhatsAppPicture;
+  if (!p || !p.id || !p.imageUrl) {
+    res.status(400).json({ error: 'Image WhatsApp invalide.' });
+    return;
+  }
+  await db.run(
+    'INSERT OR REPLACE INTO whatsapp_pictures (id, image_url, caption) VALUES (?, ?, ?)',
+    [p.id, p.imageUrl, p.caption ?? '']
+  );
+  res.json(p);
+}));
+
+app.delete('/api/whatsapp/:id', requireAuth(async (req, res) => {
+  await db.run('DELETE FROM whatsapp_pictures WHERE id = ?', [req.params.id]);
+  res.json({ id: req.params.id });
+}));
+
 // Bulk import (replace everything) & reset
 app.post('/api/import', requireAuth(async (req, res) => {
-  const { products, categories, instagramPosts, customerReviews } = req.body as any;
+  const { products, categories, instagramPosts, customerReviews, whatsappPictures } = req.body as any;
   if (
     !Array.isArray(products) ||
     !Array.isArray(categories) ||
@@ -786,11 +819,13 @@ app.post('/api/import', requireAuth(async (req, res) => {
     return;
   }
   const reviews: CustomerReview[] = Array.isArray(customerReviews) ? customerReviews : [];
+  const whatsapp: WhatsAppPicture[] = Array.isArray(whatsappPictures) ? whatsappPictures : [];
   await db.transaction(async (tx) => {
     await tx.run('DELETE FROM products', []);
     await tx.run('DELETE FROM categories', []);
     await tx.run('DELETE FROM instagram_posts', []);
     await tx.run('DELETE FROM customer_reviews', []);
+    await tx.run('DELETE FROM whatsapp_pictures', []);
     for (const p of products as Product[]) {
       const row = productRow(p);
       await tx.run(row.sql, row.args);
@@ -807,6 +842,12 @@ app.post('/api/import', requireAuth(async (req, res) => {
       const row = reviewRow(r);
       await tx.run(row.sql, row.args);
     }
+    for (const w of whatsapp) {
+      await tx.run(
+        'INSERT OR REPLACE INTO whatsapp_pictures (id, image_url, caption) VALUES (?, ?, ?)',
+        [w.id, w.imageUrl, w.caption ?? '']
+      );
+    }
   });
   res.json(await fetchAll());
 }));
@@ -817,6 +858,7 @@ app.post('/api/reset', requireAuth(async (_req, res) => {
     await tx.run('DELETE FROM categories', []);
     await tx.run('DELETE FROM instagram_posts', []);
     await tx.run('DELETE FROM customer_reviews', []);
+    await tx.run('DELETE FROM whatsapp_pictures', []);
   });
   await seed();
   res.json(await fetchAll());

@@ -90,6 +90,13 @@ export interface CustomerReview {
   company?: string;
 }
 
+export interface WhatsAppPicture {
+  id: string;
+  imageUrl: string;
+  caption?: string;
+  createdAt?: string;
+}
+
 export interface InstagramPost {
   id: string;
   handle: string;

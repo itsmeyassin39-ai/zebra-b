@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useCallback, useEffect, useMemo, useState } from 'react';
-import { Product, CategoryInfo, InstagramPost, CustomerReview } from '../types';
+import { Product, CategoryInfo, InstagramPost, CustomerReview, WhatsAppPicture } from '../types';
 import { api } from '../api/client';
 import { clearSession } from './auth';
 
@@ -8,6 +8,7 @@ export interface StoreData {
   categories: CategoryInfo[];
   instagramPosts: InstagramPost[];
   customerReviews: CustomerReview[];
+  whatsappPictures: WhatsAppPicture[];
 }
 
 interface StoreContextValue extends StoreData {
@@ -27,6 +28,8 @@ interface StoreContextValue extends StoreData {
   addCustomerReview: (review: CustomerReview) => Promise<void>;
   updateCustomerReview: (id: string, patch: Partial<CustomerReview>) => Promise<void>;
   deleteCustomerReview: (id: string) => Promise<void>;
+  addWhatsAppPicture: (picture: WhatsAppPicture) => Promise<void>;
+  deleteWhatsAppPicture: (id: string) => Promise<void>;
   exportJson: () => string;
   importJson: (json: string) => Promise<boolean>;
   resetAll: () => Promise<void>;
@@ -34,7 +37,7 @@ interface StoreContextValue extends StoreData {
 
 const StoreContext = createContext<StoreContextValue | undefined>(undefined);
 
-const empty: StoreData = { products: [], categories: [], instagramPosts: [], customerReviews: [] };
+const empty: StoreData = { products: [], categories: [], instagramPosts: [], customerReviews: [], whatsappPictures: [] };
 
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [data, setData] = useState<StoreData>(empty);
@@ -125,6 +128,16 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     await refresh();
   }, [refresh]);
 
+  const addWhatsAppPicture = useCallback(async (picture: WhatsAppPicture) => {
+    await api('/api/whatsapp', { method: 'POST', body: picture });
+    await refresh();
+  }, [refresh]);
+
+  const deleteWhatsAppPicture = useCallback(async (id: string) => {
+    await api(`/api/whatsapp/${encodeURIComponent(id)}`, { method: 'DELETE' });
+    await refresh();
+  }, [refresh]);
+
   const exportJson = useCallback(
     () =>
       JSON.stringify(
@@ -183,11 +196,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       addCustomerReview,
       updateCustomerReview,
       deleteCustomerReview,
+      addWhatsAppPicture,
+      deleteWhatsAppPicture,
       exportJson,
       importJson,
       resetAll,
     }),
-    [data, loading, error, lastSync, refresh, addProduct, updateProduct, deleteProduct, addCategory, updateCategory, deleteCategory, addInstagramPost, updateInstagramPost, deleteInstagramPost, addCustomerReview, updateCustomerReview, deleteCustomerReview, exportJson, importJson, resetAll]
+    [data, loading, error, lastSync, refresh, addProduct, updateProduct, deleteProduct, addCategory, updateCategory, deleteCategory, addInstagramPost, updateInstagramPost, deleteInstagramPost, addCustomerReview, updateCustomerReview, deleteCustomerReview, addWhatsAppPicture, deleteWhatsAppPicture, exportJson, importJson, resetAll]
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

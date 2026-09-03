@@ -327,7 +327,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                 </span>
               </div>
 
-              {featuredReview && averageRating !== null && (
+              {/* Written reviews have been retired; customer screenshots are shown in the gallery instead.
                 <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-3 space-y-2.5">
                   <div className="flex items-center justify-between gap-3">
                     <span className="text-[9px] font-mono uppercase tracking-[0.18em] text-zinc-400">
@@ -359,7 +359,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                     <p className="mt-1.5 text-[10px] font-mono text-zinc-500">— {featuredReview.author}</p>
                   </div>
                 </div>
-              )}
+              */}
             </div>
 
           </div>

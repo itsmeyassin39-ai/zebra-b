@@ -81,6 +81,16 @@ CREATE TABLE IF NOT EXISTS instagram_posts (
 );
 
 -- ---------------------------------------------------------------------
+-- PHOTOS WHATSAPP (captures d'écran des commandes clients)
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS whatsapp_pictures (
+  id         TEXT PRIMARY KEY,
+  image_url  TEXT NOT NULL DEFAULT '',
+  caption    TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- ---------------------------------------------------------------------
 -- AVIS CLIENTS
 -- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS customer_reviews (

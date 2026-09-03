@@ -4,6 +4,7 @@ import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 
 import { FeaturedProducts } from './components/FeaturedProducts';
+import { ReviewsSection } from './components/ReviewsSection';
 import { Footer } from './components/Footer';
 
 import { CartDrawer } from './components/CartDrawer';
@@ -283,6 +284,8 @@ export default function App() {
             onAddToCart={(prod, colorIdx) => handleAddToCart(prod, colorIdx)}
             onToggleWishlist={handleToggleWishlist}
           />
+
+          <ReviewsSection />
 
           {/* 13. Professional Luxury Footer */}
           <Footer
