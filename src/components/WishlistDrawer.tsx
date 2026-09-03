@@ -85,7 +85,9 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
                 >
                   <img
                     src={product.images.main}
-                    alt={product.name}
+                    alt={`${product.name} – Zebra Bags Maroc`}
+                    loading="lazy"
+                    decoding="async"
                     referrerPolicy="no-referrer"
                     className="w-20 h-20 rounded-lg object-cover border border-zinc-800 shrink-0 cursor-pointer"
                     onClick={() => {

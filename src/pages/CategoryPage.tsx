@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Heart, ShoppingBag, Check, ChevronLeft } from 'lucide-react';
 import { Product, Currency } from '../types';
 import { useStore } from '../store/StoreContext';
@@ -13,6 +13,29 @@ interface CategoryPageProps {
   onToggleWishlist: (product: Product) => void;
   onHome: () => void;
 }
+
+const CATEGORY_SEO: Record<string, { title: string; description: string }> = {
+  backpacks: {
+    title: 'Sacs à Dos au Maroc | Zebra Bags – Livraison Gratuite',
+    description: 'Découvrez nos sacs à dos tendance et élégants au Maroc. Sacs à dos cuir, scolaire et urbain. Livraison gratuite partout au Maroc et paiement à la livraison.',
+  },
+  travel: {
+    title: 'Sacs de Voyage au Maroc | Zebra Bags – Livraison Gratuite',
+    description: 'Sac de voyage cabine et weekend bag au Maroc. Sacs de voyage spacieux et élégants avec livraison gratuite. Paiement à la livraison.',
+  },
+  crossbody: {
+    title: 'Sacs Bandoulière au Maroc | Zebra Bags – Livraison Gratuite',
+    description: 'Sacs bandoulière tendance au Maroc en cuir synthétique et grainé. Modèles élégants avec livraison gratuite et paiement à la livraison.',
+  },
+  clutches: {
+    title: 'Pochettes & Mini Sacs au Maroc | Zebra Bags',
+    description: 'Pochettes de soirée, mini sacs et clutches élégants au Maroc. Livraison gratuite et paiement à la livraison.',
+  },
+  accessories: {
+    title: 'Accessoires & Maroquinerie au Maroc | Zebra Bags',
+    description: 'Accessoires de maroquinerie : ceintures, porte-cartes et plus au Maroc. Livraison gratuite et paiement à la livraison.',
+  },
+};
 
 export const CategoryPage: React.FC<CategoryPageProps> = ({
   categoryId,
@@ -29,6 +52,18 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
 
   const category = categories.find((c) => c.id === categoryId);
   const categoryProducts = products.filter((p) => p.category === categoryId);
+
+  useEffect(() => {
+    const seo = CATEGORY_SEO[categoryId];
+    if (seo) {
+      document.title = seo.title;
+      const meta = document.querySelector('meta[name="description"]');
+      if (meta) meta.setAttribute('content', `${seo.description} Sacs et maroquinerie Zebra Bags.`);
+    }
+    return () => {
+      document.title = 'Zebra Bags | Sacs & Maroquinerie de Luxe au Maroc – Livraison Gratuite';
+    };
+  }, [categoryId]);
 
   const handleQuickAdd = (e: React.MouseEvent, product: Product) => {
     e.stopPropagation();
@@ -105,7 +140,9 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
                   >
                     <img
                       src={isHovered ? product.images.hover : product.images.main}
-                      alt={product.name}
+                      alt={`${product.name} – Zebra Bags Maroc`}
+                      loading="lazy"
+                      decoding="async"
                       referrerPolicy="no-referrer"
                       className="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-700"
                     />

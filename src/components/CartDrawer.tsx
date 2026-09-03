@@ -143,7 +143,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   {/* Thumbnail */}
                   <img
                     src={item.product.images.main}
-                    alt={item.product.name}
+                    alt={`${item.product.name} – Zebra Bags Maroc`}
+                    loading="lazy"
+                    decoding="async"
                     referrerPolicy="no-referrer"
                     className="w-20 h-20 rounded-lg object-cover border border-zinc-800 shrink-0"
                   />

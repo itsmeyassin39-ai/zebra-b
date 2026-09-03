@@ -43,7 +43,7 @@ export const Footer: React.FC<FooterProps> = ({
               <div className="w-8 h-8 rounded bg-white border border-zinc-300 flex items-center justify-center shadow-sm overflow-hidden">
                 <img
                   src={LOGO_URL}
-                  alt="Zebra"
+                  alt="Zebra Bags – maroquinerie Maroc"
                   className="w-full h-full object-contain"
                 />
               </div>
@@ -55,6 +55,17 @@ export const Footer: React.FC<FooterProps> = ({
             <p className="text-xs text-zinc-600 font-light leading-relaxed max-w-sm">
               Haute maroquinerie inspirée par le contraste des rayures naturelles du zèbre et l'artisanat architectural italien. Confectionnée à la main en Toscane pour les individualistes assumés.
             </p>
+
+            {/* SEO keyword-rich content */}
+            <div className="text-[10px] text-zinc-500 leading-relaxed max-w-sm pt-1 space-y-1">
+              <p>
+                <strong className="text-zinc-700">Zebra Bags Maroc</strong> – Boutique en ligne de sacs et maroquinerie avec livraison gratuite partout au Maroc : Casablanca, Rabat, Marrakech, Tanger, Fès, Agadir et plus.
+              </p>
+              <p>
+                Spécialistes des <strong className="text-zinc-700">sacs à main</strong>, <strong className="text-zinc-700">sacs à dos</strong>, <strong className="text-zinc-700">sacs bandoulière</strong>, <strong className="text-zinc-700">pochettes</strong> et <strong className="text-zinc-700">sacs de voyage</strong> au Maroc.
+              </p>
+              <p>Paiement à la livraison. Livraison express 24h.</p>
+            </div>
 
             {/* Social Icons */}
             <div className="flex items-center space-x-3 pt-2">

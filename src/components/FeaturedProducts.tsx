@@ -61,9 +61,15 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
         {/* Header and Filter Tabs */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div className="space-y-3 text-left">
-            
-
-
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.28em] text-zinc-500">
+              L&apos;atelier Zebra
+            </p>
+            <h2 className="text-4xl sm:text-5xl font-semibold tracking-tight text-zinc-950">
+              Notre collection de sacs
+            </h2>
+            <p className="max-w-md text-sm leading-6 text-zinc-600">
+              Des pièces signature de maroquinerie pensées pour vous accompagner partout au Maroc.
+            </p>
           </div>
 
           {/* Filter Pills */}
@@ -157,7 +163,9 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                     {/* Main vs Hover Image */}
                     <img
                       src={isHovered ? product.images.hover : product.images.main}
-                      alt={product.name}
+                      alt={`${product.name} – Zebra Bags Maroc`}
+                      loading="lazy"
+                      decoding="async"
                       referrerPolicy="no-referrer"
                       className="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-700"
                     />

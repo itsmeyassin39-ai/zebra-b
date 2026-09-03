@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Heart,
@@ -77,6 +77,47 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
     : null;
   const featuredReview = productReviews[0];
 
+  useEffect(() => {
+    if (!product) return;
+    const schemaId = 'product-schema';
+    const existing = document.getElementById(schemaId);
+    if (existing) existing.remove();
+    const imageUrl = product.images.main.startsWith('http')
+      ? product.images.main
+      : `https://zebrabags.shop${product.images.main.replace(/\s/g, '%20')}`;
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = schemaId;
+    script.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: `${product.name} – Zebra Bags`,
+      description: product.tagline,
+      image: imageUrl,
+      brand: { '@type': 'Brand', name: 'Zebra Bags' },
+      sku: product.id,
+      offers: {
+        '@type': 'Offer',
+        url: `https://zebrabags.shop/#product/${product.id}`,
+        priceCurrency: 'MAD',
+        price: product.price,
+        availability: product.stockCount > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+        itemCondition: 'https://schema.org/NewCondition',
+        seller: { '@type': 'Organization', name: 'Zebra Bags' },
+        areaServed: { '@type': 'Country', name: 'Maroc' },
+      },
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: product.rating,
+        reviewCount: product.reviewsCount,
+      },
+    });
+    document.head.appendChild(script);
+    return () => {
+      document.getElementById(schemaId)?.remove();
+    };
+  }, [product]);
+
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Backdrop */}
@@ -108,7 +149,9 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
             <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-black border border-zinc-800 flex items-center justify-center">
               <img
                 src={imagesList[activeImageIdx]?.url ?? product.images.main}
-                alt={product.name}
+                alt={`${product.name} – Zebra Bags Maroc`}
+                loading="eager"
+                decoding="async"
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover object-center"
               />
@@ -151,7 +194,9 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                 >
                   <img
                     src={img.url}
-                    alt={img.label}
+                    alt={`${product.name} – ${img.label}`}
+                    loading="lazy"
+                    decoding="async"
                     referrerPolicy="no-referrer"
                     className="w-full h-full object-cover"
                   />

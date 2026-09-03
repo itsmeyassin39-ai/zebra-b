@@ -35,6 +35,11 @@ export default function App() {
     return () => window.removeEventListener('hashchange', handleHash);
   }, []);
 
+  // Global SEO: set default title for home page
+  useEffect(() => {
+    document.title = 'Zebra Bags | Sacs & Maroquinerie de Luxe au Maroc – Livraison Gratuite';
+  }, []);
+
   // State management
   const [currentCurrency, setCurrentCurrency] = useState<Currency>('DH');
   const [activeCategory, setActiveCategory] = useState<string>('all');
@@ -177,7 +182,7 @@ export default function App() {
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4">
         <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center overflow-hidden shadow-lg">
-          <img src="/assets/imgs/Zebra logo (1).png" alt="Zebra Bags" className="w-full h-full object-contain p-2" />
+          <img src="/assets/imgs/Zebra logo (1).png" alt="Zebra Bags – Maroquinerie au Maroc" loading="eager" decoding="async" className="w-full h-full object-contain p-2" />
         </div>
         <div className="w-8 h-8 border-2 border-zinc-200 border-t-zinc-900 rounded-full animate-spin" />
         <p className="text-zinc-400 text-sm font-mono uppercase tracking-widest">

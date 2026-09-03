@@ -1,11 +1,14 @@
 {
-  "name": "Zebra Bags - Tableau de bord",
+  "name": "Zebra Bags | Sacs & Maroquinerie de Luxe au Maroc",
   "short_name": "Zebra Bags",
-  "description": "Boutique de maroquinerie de luxe et tableau de bord en temps réel.",
-  "start_url": "/#/dashboard",
+  "description": "Boutique en ligne n°1 de sacs et maroquinerie au Maroc. Sacs à main, bandoulières, sacs à dos et voyage. Livraison gratuite et paiement à la livraison.",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#0c0c0d",
   "theme_color": "#000000",
+  "categories": ["shopping", "lifestyle"],
+  "lang": "fr-MA",
+  "dir": "ltr",
   "icons": [
     {
       "src": "/assets/imgs/Zebra logo (1).png",

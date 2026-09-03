@@ -111,7 +111,9 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                       <div className="flex items-center gap-3">
                         <img
                           src={product.images.main}
-                          alt={product.name}
+                          alt={`${product.name} – Zebra Bags Maroc`}
+                          loading="lazy"
+                          decoding="async"
                           referrerPolicy="no-referrer"
                           className="w-14 h-14 rounded-lg object-cover border border-zinc-800"
                         />
@@ -176,7 +178,9 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                     >
                       <img
                         src={prod.images.main}
-                        alt={prod.name}
+                        alt={`${prod.name} – Zebra Bags Maroc`}
+                        loading="lazy"
+                        decoding="async"
                         referrerPolicy="no-referrer"
                         className="w-12 h-12 rounded-lg object-cover"
                       />

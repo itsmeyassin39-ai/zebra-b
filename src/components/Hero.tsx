@@ -95,14 +95,24 @@ export const Hero: React.FC<HeroProps> = ({
           {/* Headline with clear separation from navbar */}
           <motion.div variants={itemVariants}>
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] xl:text-[4.85rem] font-sans font-bold text-white uppercase leading-[1.0] tracking-tight">
-              conçu<br />
-              Pour la concentration.<br />
+              Zebra Bags<br />
+              Sacs & Maroquinerie<br />
               <span className="text-white/40 font-sans font-normal italic">
-               pensé<br />
-                Pour Nous.
+                de Luxe au Maroc
               </span>
             </h1>
           </motion.div>
+
+          {/* SEO content block */}
+          <div className="sr-only">
+            <h2>Zebra Bags Maroc – Boutique de sacs et maroquinerie en ligne</h2>
+            <p>
+              Zebra Bags est la boutique en ligne référence au Maroc pour les sacs à main, sacs à dos,
+              sacs bandoulière, pochettes et sacs de voyage. Livraison gratuite partout au Maroc et
+              paiement à la livraison. Découvrez nos collections de sacs tendance en cuir italien à
+              Casablanca, Rabat, Marrakech, Tanger, Fès et dans tout le Maroc.
+            </p>
+          </div>
 
           {/* Details & Subheadlines rendered as clean editorial typography */}
           <motion.div variants={itemVariants} className="space-y-4 max-w-md">

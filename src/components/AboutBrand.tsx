@@ -19,7 +19,9 @@ export const AboutBrand: React.FC = () => {
               <div className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-zinc-200 shadow-xl">
                 <img
                   src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1000&q=85"
-                  alt="Zebra Bags Artisanat d'Exception"
+                  alt="Zebra Bags artisanat d'exception – maroquinerie de luxe au Maroc"
+                  loading="lazy"
+                  decoding="async"
                   referrerPolicy="no-referrer"
                   className="w-full h-full object-cover object-center brightness-95 hover:scale-105 transition-transform duration-700"
                 />
@@ -40,7 +42,9 @@ export const AboutBrand: React.FC = () => {
               <div className="hidden sm:block absolute -bottom-6 -right-6 w-52 aspect-square rounded-xl overflow-hidden border-2 border-white shadow-2xl bg-zinc-100">
                 <img
                   src="https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=600&q=85"
-                  alt="Couture Sellier Toscan"
+                  alt="Couture sellier toscan – fabrication de sacs Zebra Bags"
+                  loading="lazy"
+                  decoding="async"
                   referrerPolicy="no-referrer"
                   className="w-full h-full object-cover"
                 />

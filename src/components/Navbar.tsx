@@ -117,7 +117,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="w-8 h-8 rounded-xl bg-white text-black flex items-center justify-center font-black tracking-tighter text-base shadow-sm group-hover:scale-105 transition-transform duration-200 overflow-hidden">
                 <img
                   src={LOGO_URL}
-                  alt="Zebra"
+                  alt="Zebra Bags – logo"
                   className="w-full h-full object-contain"
                 />
               </div>
@@ -227,7 +227,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 <div className="w-7 h-7 rounded-lg bg-white text-black flex items-center justify-center font-black overflow-hidden">
                     <img
                       src={LOGO_URL}
-                      alt="Zebra"
+                      alt="Zebra Bags"
                       className="w-full h-full object-contain"
                     />
                   </div>
