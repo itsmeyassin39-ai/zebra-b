@@ -94,7 +94,7 @@ export const Hero: React.FC<HeroProps> = ({
         >
           {/* Headline with clear separation from navbar */}
           <motion.div variants={itemVariants}>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] xl:text-[4.85rem] font-sans font-bold text-white uppercase leading-[1.0] tracking-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] xl:text-[4.85rem] font-['Cinzel',serif] font-bold text-white uppercase leading-[1.0] tracking-tight">
               conçu <br />
               Pour la Concentration<br />
               <span className="text-white/40 font-sans font-normal italic">
