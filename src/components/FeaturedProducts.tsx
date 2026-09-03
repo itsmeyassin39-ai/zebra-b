@@ -67,9 +67,7 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
             <h2 className="text-4xl sm:text-5xl font-semibold tracking-tight text-zinc-950">
               Notre collection de sacs
             </h2>
-            <p className="max-w-md text-sm leading-6 text-zinc-600">
-              Des pièces signature de maroquinerie pensées pour vous accompagner partout au Maroc.
-            </p>
+            
           </div>
 
           {/* Filter Pills */}
