@@ -65,7 +65,7 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
               L&apos;atelier Zebra
             </p>
             <h2 className="text-4xl sm:text-5xl font-semibold tracking-tight text-zinc-950">
-              Notre collection de sacs
+              Notre collection des sacs
             </h2>
             
           </div>

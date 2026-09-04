@@ -12,6 +12,7 @@ import { WishlistDrawer } from './components/WishlistDrawer';
 import { QuickViewModal } from './components/QuickViewModal';
 import { SearchModal } from './components/SearchModal';
 import { CheckoutModal } from './components/CheckoutModal';
+import WhatsAppButton from './components/WhatsAppButton';
 
 import { Product, Currency, CartItem } from './types';
 import { useStore } from './store/StoreContext';
@@ -349,6 +350,9 @@ export default function App() {
         onClose={() => setIsCheckoutOpen(false)}
         onOrderSuccess={handleOrderCompleted}
       />
+
+      {/* Floating WhatsApp button */}
+      <WhatsAppButton />
 
     </div>
   );
