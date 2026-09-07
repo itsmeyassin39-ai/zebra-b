@@ -27,6 +27,7 @@ import {
   Volume2,
   Sparkles,
   Star,
+  Link,
 } from 'lucide-react';
 import { Product, CategoryInfo, ProductColor, Order, OrderStatus, Currency, CustomerReview, WhatsAppPicture } from '../types';
 import { useStore } from '../store/StoreContext';
@@ -317,6 +318,22 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
       p.material.toLowerCase().includes(q)
     );
   });
+
+  const handleCopyProductLink = (productId: string) => {
+    const url = `${window.location.origin}${window.location.pathname}#/product/${productId}`;
+    navigator.clipboard.writeText(url).then(() => {
+      notify('Lien copié !');
+    }).catch(() => {
+      // Fallback for older browsers
+      const input = document.createElement('input');
+      input.value = url;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      document.body.removeChild(input);
+      notify('Lien copié !');
+    });
+  };
 
   const openNewProduct = () => {
     setEditingProductId(null);
@@ -666,23 +683,29 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
 
                       <div className="mt-4 pt-4 border-t border-zinc-100 flex gap-2">
                         <button
+                          onClick={() => handleCopyProductLink(p.id)}
+                          className="inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-zinc-200 text-zinc-600 text-sm font-bold hover:bg-zinc-50 transition-colors cursor-pointer"
+                          title="Copier le lien de partage"
+                        >
+                          <Link className="w-4 h-4" />
+                          Copier le lien
+                        </button>
+                        <button
                           onClick={() => {
                             if (window.confirm(`Supprimer « ${p.name} » ?`)) {
                               store.deleteProduct(p.id);
                               notify('Produit supprimé');
                             }
                           }}
-                          className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-red-200 text-red-600 text-sm font-bold hover:bg-red-50 transition-colors cursor-pointer"
+                          className="inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-red-200 text-red-600 text-sm font-bold hover:bg-red-50 transition-colors cursor-pointer"
                         >
                           <Trash2 className="w-4 h-4" />
-                          Supprimer
                         </button>
                         <button
                           onClick={() => openEditProduct(p)}
-                          className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-black text-white text-sm font-bold hover:bg-zinc-800 transition-colors cursor-pointer"
+                          className="inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-black text-white text-sm font-bold hover:bg-zinc-800 transition-colors cursor-pointer"
                         >
                           <Pencil className="w-4 h-4" />
-                          Modifier
                         </button>
                       </div>
                     </div>

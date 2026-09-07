@@ -20,6 +20,7 @@ import AuthGate from './components/AuthGate';
 import Dashboard from './pages/Dashboard';
 import TrackOrder from './pages/TrackOrder';
 import { CategoryPage } from './pages/CategoryPage';
+import ProductShare from './pages/ProductShare';
 
 export default function App() {
   const { products, loading, error, refresh } = useStore();
@@ -223,6 +224,18 @@ export default function App() {
   if (route.startsWith('#/track')) {
     return (
       <TrackOrder onClose={() => { window.location.hash = ''; }} />
+    );
+  }
+
+  const productMatch = route.match(/^#\/product\/([^/]+)/);
+  const sharedProductId = productMatch ? decodeURIComponent(productMatch[1]) : null;
+
+  if (sharedProductId) {
+    return (
+      <ProductShare
+        productId={sharedProductId}
+        onClose={() => { window.location.hash = ''; }}
+      />
     );
   }
 
