@@ -25,7 +25,10 @@ import ProductShare from './pages/ProductShare';
 export default function App() {
   const { products, loading, error, refresh } = useStore();
 
-  const [route, setRoute] = useState<string>('');
+  // Read the hash on the first render as well as on later navigation. Without
+  // this, opening a copied #/product/... link directly falls back to the home
+  // page because no `hashchange` event is fired during the initial load.
+  const [route, setRoute] = useState<string>(() => window.location.hash);
 
   useEffect(() => {
     // Never open on the dashboard: entering/reloading the site always starts
