@@ -117,7 +117,8 @@ export default function App() {
     selectedColorIdx: number = 0,
     hardware: string = 'Argent brossé Palladium',
     monogram?: string,
-    quantity: number = 1
+    quantity: number = 1,
+    openCart: boolean = true
   ) => {
     const color = product.colors[selectedColorIdx] || product.colors[0];
     const existingIndex = cartItems.findIndex(
@@ -144,7 +145,7 @@ export default function App() {
       };
       setCartItems((prev) => [newItem, ...prev]);
     }
-    setIsCartOpen(true);
+    if (openCart) setIsCartOpen(true);
   };
 
   const handleUpdateQuantity = (cartItemId: string, delta: number) => {
@@ -235,10 +236,39 @@ export default function App() {
 
   if (sharedProductId) {
     return (
-      <ProductShare
-        productId={sharedProductId}
-        onClose={() => { window.location.hash = ''; }}
-      />
+      <>
+        <ProductShare
+          productId={sharedProductId}
+          onClose={() => { window.location.hash = ''; }}
+          cartCount={cartCount}
+          onAddToCart={(prod, colorIdx, hw, mono, qty) =>
+            handleAddToCart(prod, colorIdx, hw, mono, qty, false)
+          }
+          onOpenCart={() => setIsCartOpen(true)}
+        />
+
+        <CartDrawer
+          isOpen={isCartOpen}
+          items={cartItems}
+          currentCurrency={currentCurrency}
+          onClose={() => setIsCartOpen(false)}
+          onUpdateQuantity={handleUpdateQuantity}
+          onRemoveItem={handleRemoveFromCart}
+          onProceedToCheckout={handleProceedToCheckout}
+        />
+
+        <CheckoutModal
+          isOpen={isCheckoutOpen}
+          items={cartItems}
+          currentCurrency={currentCurrency}
+          appliedDiscountPercent={appliedDiscount}
+          giftNote={giftNote}
+          onClose={() => setIsCheckoutOpen(false)}
+          onOrderSuccess={handleOrderCompleted}
+        />
+
+        <WhatsAppButton />
+      </>
     );
   }
 

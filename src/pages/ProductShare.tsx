@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
@@ -15,9 +15,18 @@ import { useStore } from '../store/StoreContext';
 interface ProductShareProps {
   productId: string;
   onClose: () => void;
+  cartCount: number;
+  onAddToCart: (
+    product: Product,
+    colorIdx: number,
+    hardware: string,
+    monogram: string | undefined,
+    quantity: number
+  ) => void;
+  onOpenCart: () => void;
 }
 
-const ProductShare: React.FC<ProductShareProps> = ({ productId, onClose }) => {
+const ProductShare: React.FC<ProductShareProps> = ({ productId, onClose, cartCount, onAddToCart, onOpenCart }) => {
   const { products, loading } = useStore();
   const product = products.find((p) => p.id === productId);
 
@@ -25,6 +34,16 @@ const ProductShare: React.FC<ProductShareProps> = ({ productId, onClose }) => {
   const [selectedColorIdx, setSelectedColorIdx] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
+  const [bagPulse, setBagPulse] = useState(0);
+  const prevCount = useRef(0);
+
+  // Re-trigger the bag icon pop animation every time an item is added.
+  useEffect(() => {
+    if (cartCount > prevCount.current) {
+      setBagPulse((k) => k + 1);
+    }
+    prevCount.current = cartCount;
+  }, [cartCount]);
 
   useEffect(() => {
     if (product) {
@@ -75,6 +94,13 @@ const ProductShare: React.FC<ProductShareProps> = ({ productId, onClose }) => {
   ];
 
   const handleAddToCart = () => {
+    onAddToCart(
+      product,
+      selectedColorIdx,
+      product.hardware || 'Argent brossé Palladium',
+      undefined,
+      quantity
+    );
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
   };
@@ -91,9 +117,28 @@ const ProductShare: React.FC<ProductShareProps> = ({ productId, onClose }) => {
             <ArrowLeft className="w-4 h-4" />
             <span className="hidden sm:inline">Retour à la boutique</span>
           </button>
-          <div className="flex items-center gap-2">
-            <img src="/assets/imgs/Zebra logo (1).png" alt="Zebra Bags" className="h-7 w-7 object-contain" />
-            <span className="font-display text-sm font-extrabold tracking-tight">Zebra Bags</span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <img src="/assets/imgs/Zebra logo (1).png" alt="Zebra Bags" className="h-7 w-7 object-contain" />
+              <span className="font-display text-sm font-extrabold tracking-tight">Zebra Bags</span>
+            </div>
+            {cartCount > 0 && (
+              <button
+                id="btn-share-open-cart"
+                onClick={onOpenCart}
+                className="relative p-2 rounded-full border border-zinc-700 bg-zinc-900/70 text-white hover:bg-zinc-800 transition-colors cursor-pointer"
+                aria-label={`Ouvrir le panier (${cartCount} article${cartCount > 1 ? 's' : ''})`}
+                title="Voir mon panier"
+              >
+                <ShoppingBag className="w-5 h-5" />
+                <span
+                  key={bagPulse}
+                  className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-white text-black text-[10px] font-bold font-mono flex items-center justify-center animate-bag-pop"
+                >
+                  {cartCount}
+                </span>
+              </button>
+            )}
           </div>
         </div>
       </div>

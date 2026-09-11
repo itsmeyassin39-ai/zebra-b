@@ -681,6 +681,24 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                       <p className="text-xs text-zinc-500 line-clamp-1 mt-0.5">{p.tagline}</p>
                       <div className="mt-3 font-mono font-bold text-lg text-zinc-900">{formatPrice(p.price, 'DH')}</div>
 
+                      {(p.colors?.length ?? 0) > 0 && (
+                        <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                          {p.colors.slice(0, 6).map((c, i) => (
+                            <span
+                              key={i}
+                              title={c.name}
+                              className="w-4 h-4 rounded-full border border-zinc-300"
+                              style={{ backgroundColor: c.hex || '#fafaf9' }}
+                            />
+                          ))}
+                          {(p.colors?.length ?? 0) > 6 && (
+                            <span className="text-[10px] font-mono text-zinc-400">
+                              +{(p.colors?.length ?? 0) - 6}
+                            </span>
+                          )}
+                        </div>
+                      )}
+
                       <div className="mt-4 pt-4 border-t border-zinc-100 flex gap-2">
                         <button
                           onClick={() => handleCopyProductLink(p.id)}
@@ -881,6 +899,95 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                     <input className={`${inputCls} mt-2`} value={productForm.dimensions.unit} onChange={(e) => setProductForm((f) => ({ ...f, dimensions: { ...f.dimensions, unit: e.target.value } }))} placeholder="cm" title="Unité" />
                   </div>
                 </div>
+              </div>
+
+              {/* Couleurs du produit */}
+              <div className="border-t border-zinc-100 pt-4">
+                <h3 className="text-sm font-bold text-zinc-900 mb-4">Couleurs disponibles</h3>
+
+                <div className="space-y-3">
+                  {productForm.colors.map((cl, ci) => (
+                    <div key={ci} className="p-3 rounded-xl border border-zinc-200 bg-zinc-50/70">
+                      <div className="flex items-start gap-2">
+                        <div className="flex-1 space-y-3">
+                          <input
+                            className={inputCls}
+                            value={cl.name}
+                            onChange={(e) =>
+                              setProductForm((f) => ({
+                                ...f,
+                                colors: f.colors.map((col, i) =>
+                                  i === ci ? { ...col, name: e.target.value } : col
+                                ),
+                              }))
+                            }
+                            placeholder="Nom de la couleur (ex : Rouge)"
+                          />
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="color"
+                              className="w-12 h-10 rounded-lg border border-zinc-300 cursor-pointer bg-white p-1 shrink-0"
+                              value={cl.hex || '#fafaf9'}
+                              onChange={(e) =>
+                                setProductForm((f) => ({
+                                  ...f,
+                                  colors: f.colors.map((col, i) =>
+                                    i === ci ? { ...col, hex: e.target.value } : col
+                                  ),
+                                }))
+                              }
+                              title="Couleur de l'échantillon"
+                            />
+                            <ImageUploadField
+                              label=""
+                              compact
+                              value={cl.previewUrl}
+                              hint="Photo de cette variante (optionnel)"
+                              onChange={(url) =>
+                                setProductForm((f) => ({
+                                  ...f,
+                                  colors: f.colors.map((col, i) =>
+                                    i === ci ? { ...col, previewUrl: url } : col
+                                  ),
+                                }))
+                              }
+                            />
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setProductForm((f) => ({
+                              ...f,
+                              colors: f.colors.filter((_, i) => i !== ci),
+                            }))
+                          }
+                          className="p-2 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer shrink-0 mt-1"
+                          title="Retirer cette couleur"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setProductForm((f) => ({
+                      ...f,
+                      colors: [...f.colors, { name: '', hex: '#fafaf9', previewUrl: '' }],
+                    }))
+                  }
+                  className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-zinc-200 bg-white text-zinc-700 text-sm font-bold hover:bg-zinc-50 transition-colors cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  Ajouter une couleur
+                </button>
+                <p className={labelHint}>
+                  Ces variantes s&#39;affichent sur la fiche produit. Sans aucune couleur, le produit est vendu en « Zèbre Signature ».
+                </p>
               </div>
 
               {/* Avancé (replié) */}
