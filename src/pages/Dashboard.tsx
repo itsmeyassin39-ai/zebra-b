@@ -1671,6 +1671,7 @@ const CategoryCard: React.FC<{ category: CategoryInfo; productCount: number }> =
 };
 
 const OrdersTab: React.FC<{ liveOrder: Order | null }> = ({ liveOrder }) => {
+  const { products } = useStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState('');
@@ -1812,35 +1813,51 @@ const OrdersTab: React.FC<{ liveOrder: Order | null }> = ({ liveOrder }) => {
                 <div className="lg:col-span-6">
                   <p className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 mb-3">Articles</p>
                   <div className="space-y-3">
-                    {o.items.map((it, i) => (
-                      <div key={i} className="flex items-center gap-4 p-2.5 rounded-xl bg-zinc-50 border border-zinc-100">
-                        {it.image ? (
-                          <img
-                            src={it.image}
-                            alt={it.name}
-                            referrerPolicy="no-referrer"
-                            className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border border-zinc-200 shrink-0 bg-zinc-100"
-                          />
-                        ) : (
-                          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-zinc-100 border border-zinc-200 shrink-0 flex items-center justify-center">
-                            <ShoppingBag className="w-5 h-5 text-zinc-300" />
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-sm text-zinc-900 truncate">{it.name}</p>
-                          <p className="text-[11px] text-zinc-500 mt-0.5">{it.color}{it.hardware ? ` · ${it.hardware}` : ''}</p>
-                          {it.monogram && (
-                            <p className="text-[11px] text-zinc-400 italic mt-0.5">Monogramme : {it.monogram}</p>
+                    {o.items.map((it, i) => {
+                      const catalogProduct = products.find((p) => p.id === it.productId);
+                      const catalogColor = catalogProduct?.colors.find((c) => c.name === it.color);
+                      const itemImage = catalogColor?.previewUrl?.trim() || it.image || catalogProduct?.images.main;
+                      return (
+                        <div key={i} className="flex items-center gap-4 p-2.5 rounded-xl bg-zinc-50 border border-zinc-100">
+                          {itemImage ? (
+                            <img
+                              src={itemImage}
+                              alt={it.name}
+                              referrerPolicy="no-referrer"
+                              className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border border-zinc-200 shrink-0 bg-zinc-100"
+                            />
+                          ) : (
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-zinc-100 border border-zinc-200 shrink-0 flex items-center justify-center">
+                              <ShoppingBag className="w-5 h-5 text-zinc-300" />
+                            </div>
                           )}
-                          <div className="flex items-center justify-between mt-1.5">
-                            <span className="text-[11px] text-zinc-400">Qté : {it.quantity}</span>
-                            <span className="font-mono text-sm font-bold text-zinc-900">
-                              {formatPrice(it.price * it.quantity, o.currency as Currency)}
-                            </span>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-sm text-zinc-900 truncate">{it.name}</p>
+                            <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
+                              {catalogColor?.hex && (
+                                <span
+                                  className="w-3.5 h-3.5 rounded-full border border-zinc-300 shrink-0"
+                                  style={{ backgroundColor: catalogColor.hex }}
+                                  title={catalogColor.name}
+                                />
+                              )}
+                              <p className="text-[11px] text-zinc-500 truncate">
+                                {it.color}{it.hardware ? ` · ${it.hardware}` : ''}
+                              </p>
+                            </div>
+                            {it.monogram && (
+                              <p className="text-[11px] text-zinc-400 italic mt-0.5">Monogramme : {it.monogram}</p>
+                            )}
+                            <div className="flex items-center justify-between mt-1.5">
+                              <span className="text-[11px] text-zinc-400">Qté : {it.quantity}</span>
+                              <span className="font-mono text-sm font-bold text-zinc-900">
+                                {formatPrice(it.price * it.quantity, o.currency as Currency)}
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                   {o.giftNote && (
                     <p className="text-zinc-400 italic text-[11px] mt-3 px-1">🎁 {o.giftNote}</p>

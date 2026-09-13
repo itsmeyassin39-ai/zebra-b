@@ -28,6 +28,7 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
   const [activeTab, setActiveTab] = useState<TabFilter>('all');
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null);
   const [addedAnimationId, setAddedAnimationId] = useState<string | null>(null);
+  const [activeColorMap, setActiveColorMap] = useState<Record<string, number>>({});
 
   const { products, categories } = useStore();
 
@@ -147,6 +148,10 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
               const isAdded = addedAnimationId === product.id;
               const isHovered = hoveredProduct === product.id;
               const isOutOfStock = product.stockCount <= 0;
+              const activeColorIdx = activeColorMap[product.id] ?? -1;
+              const activeColorPreview =
+                activeColorIdx >= 0 ? product.colors[activeColorIdx]?.previewUrl?.trim() : '';
+              const cardImage = activeColorPreview || (isHovered ? product.images.hover : product.images.main);
 
               return (
                 <div
@@ -160,7 +165,7 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                   <div className="relative aspect-square w-full bg-zinc-100 overflow-hidden cursor-pointer" onClick={() => onQuickView(product)}>
                     {/* Main vs Hover Image */}
                     <img
-                      src={isHovered ? product.images.hover : product.images.main}
+                      src={cardImage}
                       alt={`${product.name} – Zebra Bags Maroc`}
                       loading="lazy"
                       decoding="async"
@@ -266,6 +271,29 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                         {product.name}
                       </h3>
                     </div>
+
+                    {/* Colors */}
+                    {product.colors.length > 0 && (
+                      <div className="flex items-center gap-1.5 mt-1">
+                        {product.colors.map((color, i) => (
+                          <button
+                            key={`${product.id}-color-${i}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveColorMap((m) => ({ ...m, [product.id]: i }));
+                            }}
+                            title={color.name}
+                            aria-label={`Couleur : ${color.name}`}
+                            className={`w-4 h-4 rounded-full border transition-all cursor-pointer ${
+                              activeColorIdx === i
+                                ? 'ring-2 ring-zinc-900 ring-offset-1 border-white scale-110'
+                                : 'border-zinc-300 hover:scale-110 hover:border-zinc-500'
+                            }`}
+                            style={{ backgroundColor: color.hex || '#fafaf9' }}
+                          />
+                        ))}
+                      </div>
+                    )}
 
                     {/* Price */}
                     <div className="flex items-baseline gap-2">

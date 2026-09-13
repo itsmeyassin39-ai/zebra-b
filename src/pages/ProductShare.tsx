@@ -77,7 +77,15 @@ const ProductShare: React.FC<ProductShareProps> = ({ productId, onClose, cartCou
     );
   }
 
+  const selectedColor = product.colors[selectedColorIdx];
+  const selectedColorPreview = selectedColor?.previewUrl?.trim();
+
+  // When a specific color is selected and we have a photo for that variant,
+  // it becomes the leading image so the customer sees the bag in that color.
   const imagesList = [
+    ...(selectedColorPreview
+      ? [{ key: `color-${selectedColorIdx}` as const, label: selectedColor.name, url: selectedColorPreview }]
+      : []),
     { key: 'main' as const, label: 'Vue de Face', url: product.images.main },
     { key: 'hover' as const, label: 'Vue de Profil', url: product.images.hover },
     ...(product.images.detail
@@ -263,7 +271,10 @@ const ProductShare: React.FC<ProductShareProps> = ({ productId, onClose, cartCou
                   {product.colors.map((color, i) => (
                     <button
                       key={i}
-                      onClick={() => setSelectedColorIdx(i)}
+                      onClick={() => {
+                        setSelectedColorIdx(i);
+                        setActiveImageIdx(0);
+                      }}
                       className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium transition-all cursor-pointer ${
                         selectedColorIdx === i
                           ? 'border-white bg-white/10 text-white'
