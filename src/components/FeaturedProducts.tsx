@@ -148,9 +148,10 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
               const isAdded = addedAnimationId === product.id;
               const isHovered = hoveredProduct === product.id;
               const isOutOfStock = product.stockCount <= 0;
+              const productColors = Array.isArray(product.colors) ? product.colors : [];
               const activeColorIdx = activeColorMap[product.id] ?? -1;
               const activeColorPreview =
-                activeColorIdx >= 0 ? product.colors[activeColorIdx]?.previewUrl?.trim() : '';
+                activeColorIdx >= 0 ? productColors[activeColorIdx]?.previewUrl?.trim() : '';
               const cardImage = activeColorPreview || (isHovered ? product.images.hover : product.images.main);
 
               return (
@@ -273,23 +274,23 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                     </div>
 
                     {/* Colors */}
-                    {product.colors.length > 0 && (
+                    {productColors.length > 0 && (
                       <div className="flex items-center gap-1.5 mt-1">
-                        {product.colors.map((color, i) => (
+                        {productColors.map((color, i) => (
                           <button
                             key={`${product.id}-color-${i}`}
                             onClick={(e) => {
                               e.stopPropagation();
                               setActiveColorMap((m) => ({ ...m, [product.id]: i }));
                             }}
-                            title={color.name}
-                            aria-label={`Couleur : ${color.name}`}
+                            title={color.name || `Couleur ${i + 1}`}
+                            aria-label={`Couleur : ${color.name || `Couleur ${i + 1}`}`}
                             className={`w-4 h-4 rounded-full border transition-all cursor-pointer ${
                               activeColorIdx === i
                                 ? 'ring-2 ring-zinc-900 ring-offset-1 border-white scale-110'
                                 : 'border-zinc-300 hover:scale-110 hover:border-zinc-500'
                             }`}
-                            style={{ backgroundColor: color.hex || '#fafaf9' }}
+                            style={{ backgroundColor: color.hex || '#111111' }}
                           />
                         ))}
                       </div>

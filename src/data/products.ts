@@ -101,9 +101,9 @@ export const PRODUCTS: Product[] = [
       lifestyle: '/assets/imgs/Bag TDD.jpeg',
     },
     colors: [
-      { name: 'Poil de Veau Zébré & Cuir Noir', hex: '#1e1e1e', previewUrl: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=400&q=80' },
-      { name: 'Noir Onyx Mat', hex: '#0d0d0e', previewUrl: 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?auto=format&fit=crop&w=400&q=80' },
-      { name: 'Blanc Glacier & Argent Ombré', hex: '#e8e8e8', previewUrl: 'https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=400&q=80' },
+      { name: 'Noir Ébène & Poil de Veau Zébré', hex: '#111111', previewUrl: '/assets/imgs/Bag TD 1.jpeg' },
+      { name: 'Camel Gold & Cadenas Palladium', hex: '#8a6d4f', previewUrl: '/assets/imgs/Bag TD 2.jpeg' },
+      { name: 'Blanc Glacier & Argent Pur', hex: '#f0ede6', previewUrl: '/assets/imgs/Bog TD.jpeg' },
     ],
     details: [
       'Panneau avant en poil de veau organique texturé',
@@ -607,7 +607,7 @@ export const PRODUCTS: Product[] = [
     zebraAccentStyle: 'Harnais côtelé zébré et sangle jacquard ajustable',
   },
   {
-    id: 'zebra-lumen-mini',
+    id: 'zebra-sport-travel',
     name: 'Sac de voyage sport-chic aux accents emblématiques',
     tagline: 'Découvrez la fusion parfaite entre esthétique sportive et élégance raffinée avec ce sac de voyage sophistiqué. Conçu pour l’aventurier moderne, il combine des matériaux de haute performance avec une attention méticuleuse aux détails. Doté d’un design épuré et contemporain, ce sac est l’allié idéal pour vos escapades de week-end ou vos déplacements professionnels. Sa structure optimisée offre un équilibre parfait entre capacité et maniabilité, tandis que ses accents distinctifs ajoutent une touche de caractère affirmée. Laissez-vous séduire par ce compagnon de voyage qui allie fonctionnalité intuitive et style intemporel.',
     category: 'crossbody',

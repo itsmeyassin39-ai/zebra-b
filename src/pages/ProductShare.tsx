@@ -77,14 +77,15 @@ const ProductShare: React.FC<ProductShareProps> = ({ productId, onClose, cartCou
     );
   }
 
-  const selectedColor = product.colors[selectedColorIdx];
+  const colorsList = Array.isArray(product.colors) && product.colors.length > 0 ? product.colors : [];
+  const selectedColor = colorsList[selectedColorIdx] || colorsList[0];
   const selectedColorPreview = selectedColor?.previewUrl?.trim();
 
   // When a specific color is selected and we have a photo for that variant,
   // it becomes the leading image so the customer sees the bag in that color.
   const imagesList = [
     ...(selectedColorPreview
-      ? [{ key: `color-${selectedColorIdx}` as const, label: selectedColor.name, url: selectedColorPreview }]
+      ? [{ key: `color-${selectedColorIdx}` as const, label: selectedColor.name || `Couleur ${selectedColorIdx + 1}`, url: selectedColorPreview }]
       : []),
     { key: 'main' as const, label: 'Vue de Face', url: product.images.main },
     { key: 'hover' as const, label: 'Vue de Profil', url: product.images.hover },
@@ -262,10 +263,10 @@ const ProductShare: React.FC<ProductShareProps> = ({ productId, onClose, cartCou
             </div>
 
             {/* Colors */}
-            {product.colors.length > 0 && product.colors[0].name && (
+            {Array.isArray(product.colors) && product.colors.length > 0 && (
               <div>
                 <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 block mb-2">
-                  Couleur
+                  Couleur : <strong className="text-zinc-200 font-normal">{selectedColor?.name || 'Standard'}</strong>
                 </span>
                 <div className="flex flex-wrap gap-2">
                   {product.colors.map((color, i) => (
@@ -277,15 +278,15 @@ const ProductShare: React.FC<ProductShareProps> = ({ productId, onClose, cartCou
                       }}
                       className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium transition-all cursor-pointer ${
                         selectedColorIdx === i
-                          ? 'border-white bg-white/10 text-white'
+                          ? 'border-white bg-white/10 text-white shadow-xs'
                           : 'border-zinc-700 text-zinc-400 hover:border-zinc-500'
                       }`}
                     >
                       <span
                         className="w-4 h-4 rounded-full border border-zinc-600"
-                        style={{ backgroundColor: color.hex || '#fafaf9' }}
+                        style={{ backgroundColor: color.hex || '#111111' }}
                       />
-                      {color.name}
+                      {color.name || `Couleur ${i + 1}`}
                     </button>
                   ))}
                 </div>
