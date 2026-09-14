@@ -88,7 +88,9 @@ const ProductShare: React.FC<ProductShareProps> = ({ productId, onClose, cartCou
       ? [{ key: `color-${selectedColorIdx}` as const, label: selectedColor.name || `Couleur ${selectedColorIdx + 1}`, url: selectedColorPreview }]
       : []),
     { key: 'main' as const, label: 'Vue de Face', url: product.images.main },
-    { key: 'hover' as const, label: 'Vue de Profil', url: product.images.hover },
+    ...(product.images.hover
+      ? [{ key: 'hover' as const, label: 'Vue de Profil', url: product.images.hover }]
+      : []),
     ...(product.images.detail
       ? [{ key: 'detail' as const, label: 'Détail', url: product.images.detail }]
       : []),

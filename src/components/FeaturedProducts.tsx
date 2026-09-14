@@ -152,7 +152,7 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
               const activeColorIdx = activeColorMap[product.id] ?? -1;
               const activeColorPreview =
                 activeColorIdx >= 0 ? productColors[activeColorIdx]?.previewUrl?.trim() : '';
-              const cardImage = activeColorPreview || (isHovered ? product.images.hover : product.images.main);
+              const cardImage = activeColorPreview || (isHovered ? product.images.hover || product.images.main : product.images.main);
 
               return (
                 <div

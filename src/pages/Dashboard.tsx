@@ -434,9 +434,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
       stockCount: productForm.stockCount,
       images: {
         main,
-        hover: productForm.hover.trim() || main,
-        detail: productForm.detail.trim() || undefined,
-        lifestyle: productForm.lifestyle.trim() || undefined,
+        hover: productForm.hover.trim() || '',
+        detail: productForm.detail.trim() || '',
+        lifestyle: productForm.lifestyle.trim() || '',
         gallery: productForm.gallery.filter(Boolean),
       },
       colors: finalColors,
