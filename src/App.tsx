@@ -2,41 +2,34 @@ import React, { useState, useEffect } from 'react';
 import { AnnouncementBar } from './components/AnnouncementBar';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
-
 import { FeaturedProducts } from './components/FeaturedProducts';
+import { CategoryPage } from './pages/CategoryPage';
 import { ReviewsSection } from './components/ReviewsSection';
 import { Footer } from './components/Footer';
-
 import { CartDrawer } from './components/CartDrawer';
 import { WishlistDrawer } from './components/WishlistDrawer';
-import { QuickViewModal } from './components/QuickViewModal';
 import { SearchModal } from './components/SearchModal';
+import { QuickViewModal } from './components/QuickViewModal';
 import { CheckoutModal } from './components/CheckoutModal';
 import WhatsAppButton from './components/WhatsAppButton';
-
-import { Product, Currency, CartItem } from './types';
-import { useStore } from './store/StoreContext';
-import AuthGate from './components/AuthGate';
 import Dashboard from './pages/Dashboard';
 import TrackOrder from './pages/TrackOrder';
-import { CategoryPage } from './pages/CategoryPage';
 import ProductShare from './pages/ProductShare';
+import AuthGate from './components/AuthGate';
+import { Product, CartItem, Currency } from './types';
+import { useStore } from './store/StoreContext';
 
-export default function App() {
+export function App() {
   const { products, loading, error, refresh } = useStore();
 
-  // Read the hash on the first render as well as on later navigation. Without
-  // this, opening a copied #/product/... link directly falls back to the home
-  // page because no `hashchange` event is fired during the initial load.
-  const [route, setRoute] = useState<string>(() => window.location.hash);
+  // Simple Hash Routing: '', '#/dashboard', '#/track', '#/product/:id', '#/category/:id'
+  const [route, setRoute] = useState<string>(() => window.location.hash || '');
 
   useEffect(() => {
-    // Never open on the dashboard: entering/reloading the site always starts
-    // on the store. The dashboard is only reachable via "Espace gestion".
-    if (window.location.hash.startsWith('#/dashboard')) {
-      history.replaceState(null, '', window.location.pathname + window.location.search);
-    }
-    const handleHash = () => setRoute(window.location.hash);
+    const handleHash = () => {
+      setRoute(window.location.hash || '');
+      window.scrollTo(0, 0);
+    };
     window.addEventListener('hashchange', handleHash);
     return () => window.removeEventListener('hashchange', handleHash);
   }, []);
@@ -52,13 +45,13 @@ export default function App() {
 
   // Cart State (initialize with 1 signature piece for an instant live feeling)
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
-    if (!products[0] || !products[0].colors[0]) return [];
+    if (!products[0]) return [];
     return [
       {
         id: 'initial-savanna-item',
         productId: products[0].id,
         product: products[0],
-        selectedColor: products[0].colors[0],
+        selectedImage: products[0].images.main,
         selectedHardware: 'Argent brossé Palladium',
         personalizedMonogram: 'ZB',
         quantity: 1,
@@ -114,17 +107,17 @@ export default function App() {
   // Add standard product to cart
   const handleAddToCart = (
     product: Product,
-    selectedColorIdx: number = 0,
+    selectedImage?: string,
     hardware: string = 'Argent brossé Palladium',
     monogram?: string,
     quantity: number = 1,
     openCart: boolean = true
   ) => {
-    const color = product.colors[selectedColorIdx] || product.colors[0];
+    const chosenImage = selectedImage || product.images.main;
     const existingIndex = cartItems.findIndex(
       (it) =>
         it.productId === product.id &&
-        it.selectedColor.name === color.name &&
+        it.selectedImage === chosenImage &&
         it.selectedHardware === hardware &&
         it.personalizedMonogram === monogram
     );
@@ -138,7 +131,7 @@ export default function App() {
         id: `cart-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
         productId: product.id,
         product,
-        selectedColor: color,
+        selectedImage: chosenImage,
         selectedHardware: hardware,
         personalizedMonogram: monogram,
         quantity,
@@ -241,8 +234,8 @@ export default function App() {
           productId={sharedProductId}
           onClose={() => { window.location.hash = ''; }}
           cartCount={cartCount}
-          onAddToCart={(prod, colorIdx, hw, mono, qty) =>
-            handleAddToCart(prod, colorIdx, hw, mono, qty, false)
+          onAddToCart={(prod, chosenImg, hw, mono, qty) =>
+            handleAddToCart(prod, chosenImg, hw, mono, qty, false)
           }
           onOpenCart={() => setIsCartOpen(true)}
         />
@@ -307,7 +300,7 @@ export default function App() {
           currentCurrency={currentCurrency}
           wishlistIds={wishlistIds}
           onQuickView={(prod) => setQuickViewProduct(prod)}
-          onAddToCart={(prod, colorIdx) => handleAddToCart(prod, colorIdx)}
+          onAddToCart={(prod, img) => handleAddToCart(prod, img)}
           onToggleWishlist={handleToggleWishlist}
           onHome={() => { window.location.hash = ''; }}
         />
@@ -328,7 +321,7 @@ export default function App() {
             wishlistIds={wishlistIds}
             onSelectCategory={setActiveCategory}
             onQuickView={(prod) => setQuickViewProduct(prod)}
-            onAddToCart={(prod, colorIdx) => handleAddToCart(prod, colorIdx)}
+            onAddToCart={(prod, img) => handleAddToCart(prod, img)}
             onToggleWishlist={handleToggleWishlist}
           />
 
@@ -371,8 +364,8 @@ export default function App() {
         currentCurrency={currentCurrency}
         isWishlisted={quickViewProduct ? wishlistIds.includes(quickViewProduct.id) : false}
         onClose={() => setQuickViewProduct(null)}
-        onAddToCart={(prod, colIdx, hw, mono, qty) => {
-          handleAddToCart(prod, colIdx, hw, mono, qty);
+        onAddToCart={(prod, chosenImg, hw, mono, qty) => {
+          handleAddToCart(prod, chosenImg, hw, mono, qty);
           setQuickViewProduct(null);
         }}
         onToggleWishlist={handleToggleWishlist}
@@ -380,10 +373,11 @@ export default function App() {
 
       <SearchModal
         isOpen={isSearchOpen}
-        currentCurrency={currentCurrency}
         onClose={() => setIsSearchOpen(false)}
+        currentCurrency={currentCurrency}
         onSelectProduct={(prod) => {
           setQuickViewProduct(prod);
+          setIsSearchOpen(false);
         }}
       />
 
@@ -397,9 +391,9 @@ export default function App() {
         onOrderSuccess={handleOrderCompleted}
       />
 
-      {/* Floating WhatsApp button */}
       <WhatsAppButton />
-
     </div>
   );
 }
+
+export default App;

@@ -224,13 +224,22 @@ export const TrackOrder: React.FC<TrackOrderProps> = ({ onClose }) => {
                     key={idx}
                     className="flex items-center justify-between gap-3 py-3 border-b border-zinc-200 last:border-0"
                   >
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-zinc-900 truncate">{item.name}</p>
-                      <p className="text-[11px] text-zinc-500 mt-0.5">
-                        {item.color}
-                        {item.hardware ? ` • ${item.hardware}` : ''}
-                        {item.monogram ? ` • Monogramme: ${item.monogram}` : ''}
-                      </p>
+                    <div className="flex items-center gap-3 min-w-0">
+                      {item.image && (
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          referrerPolicy="no-referrer"
+                          className="w-12 h-12 rounded-lg object-cover border border-zinc-200 shrink-0 bg-zinc-100"
+                        />
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-zinc-900 truncate">{item.name}</p>
+                        <p className="text-[11px] text-zinc-500 mt-0.5">
+                          {item.hardware ? item.hardware : ''}
+                          {item.monogram ? ` • Monogramme: ${item.monogram}` : ''}
+                        </p>
+                      </div>
                     </div>
                     <div className="text-right shrink-0">
                       <p className="text-sm font-bold text-zinc-900">

@@ -27,7 +27,7 @@ export interface Product {
     lifestyle?: string;
     gallery?: string[];
   };
-  colors: ProductColor[];
+  colors?: ProductColor[];
   details?: string[];
   dimensions: {
     width: number;
@@ -48,7 +48,7 @@ export interface CartItem {
   id: string; // unique item instance id
   productId: string;
   product: Product;
-  selectedColor: ProductColor;
+  selectedImage: string;
   selectedHardware: string;
   personalizedMonogram?: string;
   quantity: number;
@@ -128,7 +128,7 @@ export interface OrderItem {
   name: string;
   price: number;
   quantity: number;
-  color: string;
+  color?: string;
   hardware: string;
   monogram?: string;
   image?: string;

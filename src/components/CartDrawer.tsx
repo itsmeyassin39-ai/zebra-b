@@ -142,7 +142,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 >
                   {/* Thumbnail */}
                   <img
-                    src={item.product.images.main}
+                    src={item.selectedImage || item.product.images.main}
                     alt={`${item.product.name} – Zebra Bags Maroc`}
                     loading="lazy"
                     decoding="async"

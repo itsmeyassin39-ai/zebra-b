@@ -249,7 +249,7 @@ function productRow(p: Product): { sql: string; args: SqlArgs } {
       p.images.detail ?? null,
       p.images.lifestyle ?? null,
       JSON.stringify(p.images.gallery ?? []),
-      JSON.stringify(p.colors),
+      JSON.stringify(p.colors ?? []),
       JSON.stringify(p.details ?? []),
       JSON.stringify(p.dimensions),
       p.weight,

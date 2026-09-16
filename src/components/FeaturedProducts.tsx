@@ -10,7 +10,7 @@ interface FeaturedProductsProps {
   wishlistIds: string[];
   onSelectCategory: (category: string) => void;
   onQuickView: (product: Product) => void;
-  onAddToCart: (product: Product, colorIndex?: number) => void;
+  onAddToCart: (product: Product, selectedImage?: string) => void;
   onToggleWishlist: (product: Product) => void;
 }
 
@@ -28,13 +28,12 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
   const [activeTab, setActiveTab] = useState<TabFilter>('all');
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null);
   const [addedAnimationId, setAddedAnimationId] = useState<string | null>(null);
-  const [activeColorMap, setActiveColorMap] = useState<Record<string, number>>({});
 
   const { products, categories } = useStore();
 
   const handleQuickAdd = (e: React.MouseEvent, product: Product) => {
     e.stopPropagation();
-    onAddToCart(product);
+    onAddToCart(product, product.images.main);
     setAddedAnimationId(product.id);
     setTimeout(() => {
       setAddedAnimationId(null);
@@ -68,69 +67,73 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
             <h2 className="text-4xl sm:text-5xl font-semibold tracking-tight text-zinc-950">
               Notre collection des sacs
             </h2>
-            
           </div>
 
-          {/* Filter Pills */}
-          <div className="flex flex-wrap items-center gap-2 bg-zinc-100 p-1.5 rounded-full border border-zinc-200 text-xs">
-            {[
-              { id: 'all', label: 'Toutes les Pièces' },
-              { id: 'new', label: 'Nouvelle Saison' },
-              { id: 'bestsellers', label: 'Meilleures Ventes' },
-              { id: 'limited', label: 'Édition Limitée' },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => {
-                  setActiveTab(tab.id as TabFilter);
-                  if (activeCategory !== 'all') onSelectCategory('all');
-                }}
-                className={`px-4 py-1.5 rounded-full transition-all cursor-pointer font-medium ${
-                  activeTab === tab.id && activeCategory === 'all'
-                    ? 'bg-black text-white shadow-sm'
-                    : 'text-zinc-600 hover:text-black hover:bg-zinc-200/60'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+          {/* Tab Filters */}
+          <div className="flex items-center gap-1 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
+            <div className="bg-zinc-100 p-1 rounded-full flex gap-1 border border-zinc-200">
+              {[
+                { id: 'all', label: 'Toutes les Pièces' },
+                { id: 'bestsellers', label: 'Best-Sellers' },
+                { id: 'new', label: 'Nouveautés' },
+                { id: 'limited', label: 'Éditions Rares' },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setActiveTab(tab.id as TabFilter);
+                    if (activeCategory !== 'all') onSelectCategory('all');
+                  }}
+                  className={`px-4 py-2 rounded-full text-xs font-mono uppercase tracking-wider transition-all duration-300 whitespace-nowrap cursor-pointer ${
+                    activeTab === tab.id && activeCategory === 'all'
+                      ? 'bg-black text-white shadow-xs'
+                      : 'text-zinc-600 hover:text-black hover:bg-zinc-200/60'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Type Filter Pills */}
-        <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
+        {/* Category Pills (Secondary filter) */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-6 mb-8 scrollbar-none">
           <button
             onClick={() => onSelectCategory('all')}
-            className={`px-4 py-2 rounded-full text-xs uppercase tracking-wider transition-all cursor-pointer font-medium border ${
+            className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer whitespace-nowrap ${
               activeCategory === 'all'
-                ? 'bg-black text-white border-black shadow-sm'
-                : 'bg-white text-zinc-600 border-zinc-200 hover:text-black hover:border-zinc-400'
+                ? 'border-black bg-black text-white'
+                : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-400'
             }`}
           >
-            Tous les Types
+            Toutes ({products.length})
           </button>
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => {
-                onSelectCategory(cat.id);
-                setActiveTab('all');
-              }}
-              className={`px-4 py-2 rounded-full text-xs uppercase tracking-wider transition-all cursor-pointer font-medium border ${
-                activeCategory === cat.id
-                  ? 'bg-black text-white border-black shadow-sm'
-                  : 'bg-white text-zinc-600 border-zinc-200 hover:text-black hover:border-zinc-400'
-              }`}
-            >
-              {cat.name}
-            </button>
-          ))}
+          {categories.map((cat) => {
+            const count = products.filter((p) => p.category === cat.id).length;
+            const isSelected = activeCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => onSelectCategory(cat.id)}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer whitespace-nowrap ${
+                  isSelected
+                    ? 'border-black bg-black text-white'
+                    : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-400'
+                }`}
+              >
+                {cat.name} ({count})
+              </button>
+            );
+          })}
         </div>
 
         {/* Product Grid */}
         {filteredProducts.length === 0 ? (
-          <div className="text-center py-20 bg-zinc-50 rounded-2xl border border-zinc-200">
-            <p className="text-zinc-500 font-mono text-sm uppercase tracking-wider mb-2">Aucune création trouvée dans cette catégorie.</p>
+          <div className="py-20 text-center space-y-4">
+            <p className="text-zinc-400 font-mono text-sm">
+              Aucun modèle ne correspond à vos filtres.
+            </p>
             <button
               onClick={() => {
                 setActiveTab('all');
@@ -148,11 +151,7 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
               const isAdded = addedAnimationId === product.id;
               const isHovered = hoveredProduct === product.id;
               const isOutOfStock = product.stockCount <= 0;
-              const productColors = Array.isArray(product.colors) ? product.colors : [];
-              const activeColorIdx = activeColorMap[product.id] ?? -1;
-              const activeColorPreview =
-                activeColorIdx >= 0 ? productColors[activeColorIdx]?.previewUrl?.trim() : '';
-              const cardImage = activeColorPreview || (isHovered ? product.images.hover || product.images.main : product.images.main);
+              const cardImage = isHovered ? product.images.hover || product.images.main : product.images.main;
 
               return (
                 <div
@@ -273,29 +272,6 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                       </h3>
                     </div>
 
-                    {/* Colors */}
-                    {productColors.length > 0 && (
-                      <div className="flex items-center gap-1.5 mt-1">
-                        {productColors.map((color, i) => (
-                          <button
-                            key={`${product.id}-color-${i}`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setActiveColorMap((m) => ({ ...m, [product.id]: i }));
-                            }}
-                            title={color.name || `Couleur ${i + 1}`}
-                            aria-label={`Couleur : ${color.name || `Couleur ${i + 1}`}`}
-                            className={`w-4 h-4 rounded-full border transition-all cursor-pointer ${
-                              activeColorIdx === i
-                                ? 'ring-2 ring-zinc-900 ring-offset-1 border-white scale-110'
-                                : 'border-zinc-300 hover:scale-110 hover:border-zinc-500'
-                            }`}
-                            style={{ backgroundColor: color.hex || '#111111' }}
-                          />
-                        ))}
-                      </div>
-                    )}
-
                     {/* Price */}
                     <div className="flex items-baseline gap-2">
                       {product.originalPrice && (
@@ -307,18 +283,6 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                         {formatPrice(product.price, currentCurrency)}
                       </span>
                     </div>
-
-                    {/* Product reviews are shown in the quick-view card. */}
-                    {/*
-                              <p className="text-[10px] text-zinc-400 font-mono">
-                                — {topReview.author}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })()}
-                    */}
                   </div>
                 </div>
               );

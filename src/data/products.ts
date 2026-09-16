@@ -61,11 +61,6 @@ export const PRODUCTS: Product[] = [
       detail: '/assets/imgs/Bag 3.jpeg',
       lifestyle: '/assets/imgs/Bag 2.jpeg',
     },
-    colors: [
-      { name: 'Noir Monochrome / Soufflet Zébré', hex: '#111111', previewUrl: '/assets/imgs/Bag 1.jpeg' },
-      { name: 'Blanc Alabastre / Rayures Onyx', hex: '#f0ede6', previewUrl: 'https://images.unsplash.com/photo-1591561954557-26941169b49e?auto=format&fit=crop&w=400&q=80' },
-      { name: 'Noir Ombre Pur', hex: '#050505', previewUrl: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=400&q=80' },
-    ],
     details: [
       'Finitions de tranches peintes à la main et poignées cousues sellier',
       'Fermeture magnétique invisible sur le dessus avec fermoir pivotant finition palladium',
@@ -100,11 +95,6 @@ export const PRODUCTS: Product[] = [
       detail: '/assets/imgs/Bag TD 2.jpeg',
       lifestyle: '/assets/imgs/Bag TDD.jpeg',
     },
-    colors: [
-      { name: 'Noir Ébène & Poil de Veau Zébré', hex: '#111111', previewUrl: '/assets/imgs/Bag TD 1.jpeg' },
-      { name: 'Camel Gold & Cadenas Palladium', hex: '#8a6d4f', previewUrl: '/assets/imgs/Bag TD 2.jpeg' },
-      { name: 'Blanc Glacier & Argent Pur', hex: '#f0ede6', previewUrl: '/assets/imgs/Bog TD.jpeg' },
-    ],
     details: [
       'Panneau avant en poil de veau organique texturé',
       'Détail de chaîne gourmette entrelacée avec la bandoulière en cuir',
@@ -137,10 +127,6 @@ export const PRODUCTS: Product[] = [
       detail: '/assets/imgs/bgg.jpeg',
       lifestyle: '/assets/imgs/bkg.jpeg',
     },
-    colors: [
-      { name: 'Noir Obsidienne & Zèbre Charbon', hex: '#18181b', previewUrl: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=400&q=80' },
-      { name: 'Monochrome Haut Contraste', hex: '#27272a', previewUrl: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=400&q=80' },
-    ],
     details: [
       'Housse matelassée absorbant les chocs pour ordinateur portable 16" avec fermeture magnétique',
       'Poche passeport cachée anti-RFID sur le panneau dorsal respirant',
@@ -173,10 +159,6 @@ export const PRODUCTS: Product[] = [
       detail: '/assets/imgs/prada red.jpeg',
       lifestyle: '/assets/imgs/prada blue.jpeg',
     },
-    colors: [
-      { name: 'Toile Brute & Garniture Sangle Zébrée', hex: '#262626', previewUrl: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=400&q=80' },
-      { name: 'Édition Cuir Noir Intégral', hex: '#0a0a0a', previewUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=400&q=80' },
-    ],
     details: [
       'Conforme aux dimensions maximales bagage cabine IATA',
       'Compartiment inférieur séparé et aéré pour les chaussures',
@@ -209,10 +191,6 @@ export const PRODUCTS: Product[] = [
       detail: '/assets/imgs/lacostered.jpeg',
       lifestyle: '/assets/imgs/lacosteblue.jpeg',
     },
-    colors: [
-      { name: 'Nacre Monochrome & Émail Zébré', hex: '#fdfdfd', previewUrl: 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?auto=format&fit=crop&w=400&q=80' },
-      { name: 'Émail Onyx & Chrome Polie', hex: '#121212', previewUrl: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=400&q=80' },
-    ],
     details: [
       'Chaîne serpent délicate amovible pour un porté épaule optionnel',
       'Fermoir poussoir biseauté orné d’un cristal de quartz fumé',
@@ -243,10 +221,6 @@ export const PRODUCTS: Product[] = [
       detail: '/assets/imgs/lvgreen.jpeg',
       lifestyle: '/assets/imgs/lvred.jpeg',
     },
-    colors: [
-      { name: 'Blanc Pur & Pompon Zébré', hex: '#f5f5f4', previewUrl: 'https://images.unsplash.com/photo-1591561954557-26941169b49e?auto=format&fit=crop&w=400&q=80' },
-      { name: 'Nappa Noir Jais', hex: '#171717', previewUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=400&q=80' },
-    ],
     details: [
       'Base circulaire rigide renforcée avec 5 picots de protection',
       'Double porté : poignée main ou bandoulière statement',
@@ -263,7 +237,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: 'zebra-aura-cardholder',
-   name: 'Pochette zippée texturée',
+    name: 'Pochette zippée texturée',
     tagline: 'Succombez à l\'élégance intemporelle de ce sac pochette texturé, un accessoire indispensable qui allie sophistication et praticité. Fabriqué en similicuir grainé de haute qualité, il présente une fermeture zippée robuste et sécurisée, soulignée par une finition dorée raffinée. Sa forme compacte et élégante est parfaite pour accueillir tous vos essentiels du quotidien, tandis que sa bandoulière ajustable vous offre un confort optimal et une polyvalence de port. Idéal pour rehausser vos tenues avec une touche de chic moderne, ce sac pochette est l\'allié parfait pour vos sorties décontractées comme vos soirées élégantes.',
     category: 'clutches',
     categoryName: 'Pochettes',
@@ -276,10 +250,6 @@ export const PRODUCTS: Product[] = [
       main: '/assets/imgs/lacosteit.png',
       hover: '/assets/imgs/lacosteith.jpeg',
     },
-    colors: [
-      { name: 'Imprimé Zébré Original', hex: '#222222', previewUrl: 'https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=400&q=80' },
-      { name: 'Mono Inversé Discret', hex: '#fafafa', previewUrl: 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?auto=format&fit=crop&w=400&q=80' },
-    ],
     details: [
       '6 fentes extérieures pour cartes + 1 compartiment central zippé pour la monnaie',
       'Protection anti-RFID intégrée par maille invisible',
@@ -310,10 +280,6 @@ export const PRODUCTS: Product[] = [
       hover: '/assets/imgs/tommyh.jpeg',
       detail: '/assets/imgs/tommyh.jpg',
     },
-    colors: [
-      { name: 'Noir Tactique avec Cordon Zébré', hex: '#18181b', previewUrl: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=400&q=80' },
-      { name: 'Monochrome Onyx', hex: '#27272a', previewUrl: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=400&q=80' },
-    ],
     details: [
       'Boucle magnétique à ouverture rapide Fidlock V-buckle',
       'Poche à accès rapide zippée étanche à coutures scellées',
@@ -346,10 +312,6 @@ export const PRODUCTS: Product[] = [
       detail: '/assets/imgs/kldb.jpeg',
       lifestyle: '/assets/imgs/kldh.jpeg',
     },
-    colors: [
-      { name: 'Noir Encre & Zèbre Ivoire', hex: '#131313', previewUrl: '/assets/imgs/Bag 1.jpeg' },
-      { name: 'Camel Brûlé & Anthracite', hex: '#8a6d4f', previewUrl: '' },
-    ],
     details: [
       'Rabat supérieur plié maintenu par des aimants dissimulés',
       'Anses échancrées robustes découpées dans la masse',
@@ -379,12 +341,7 @@ export const PRODUCTS: Product[] = [
     images: {
       main: '/assets/imgs/smtak.jpeg',
       hover: '/assets/imgs/smo.jpeg',
-      
     },
-    colors: [
-      { name: 'Toile Noire & Intérieur Zébré', hex: '#1c1c1e', previewUrl: '' },
-      { name: 'Sable Brûlé & Zèbre Charbon', hex: '#b3a389', previewUrl: '' },
-    ],
     details: [
       'Ouverture large à zip bipolaire à double curseur',
       'Doublure jacquard zébré signature en 100% coton',
@@ -415,10 +372,6 @@ export const PRODUCTS: Product[] = [
       main: '/assets/imgs/kgh.png',
       hover: '/assets/imgs/kdf.jpeg',
     },
-    colors: [
-      { name: 'Basalte Gaufré & Titane', hex: '#24262a', previewUrl: '' },
-      { name: 'Ébène Mat Intégral', hex: '#0b0b0c', previewUrl: '' },
-    ],
     details: [
       'Structure rigide monobloc avec panneaux latéraux gaufrés',
       'Fermeture magnétique invisible intégrée au cadre',
@@ -449,10 +402,6 @@ export const PRODUCTS: Product[] = [
       main: '/assets/imgs/kch.jpeg',
       hover: '/assets/imgs/kch.jpeg',
     },
-    colors: [
-      { name: 'Vert Forêt & Zèbre Fumé', hex: '#2c3a2e', previewUrl: '' },
-      { name: 'Noir Tactique', hex: '#1a1a1a', previewUrl: '' },
-    ],
     details: [
       'Sangle ventrale amovible à boucle étanche monochrome zébrée',
       'Panneau dorsal en filet 3D ventilé avec canal de chaleur',
@@ -482,10 +431,6 @@ export const PRODUCTS: Product[] = [
       main: '/assets/imgs/kkj.jpeg',
       hover: '/assets/imgs/kkj.jpeg',
     },
-    colors: [
-      { name: 'Navy Profond & Zèbre Quartz', hex: '#1f2937', previewUrl: '' },
-      { name: 'Noir Intégral Haut Contraste', hex: '#101014', previewUrl: '' },
-    ],
     details: [
       'Triple compartiment séparé avec ouverture clamshell suspendue',
       'Panneaux latéraux zébrés en cuir grainé embossé',
@@ -516,10 +461,6 @@ export const PRODUCTS: Product[] = [
       main: '/assets/imgs/kbn.jpeg',
       hover: '/assets/imgs/kbn.jpeg',
     },
-    colors: [
-      { name: 'Belge Sablé & Chaîne Zébrée', hex: '#d9cbb4', previewUrl: '' },
-      { name: 'Noir & Maille Argent', hex: '#181818', previewUrl: '' },
-    ],
     details: [
       'Chaîne d’épaule panachée cuir et gourmette',
       'Fermeture magnétique à alignement zébré',
@@ -551,10 +492,6 @@ export const PRODUCTS: Product[] = [
       main: '/assets/imgs/loss.jpeg',
       hover: '/assets/imgs/los.jpeg',
     },
-    colors: [
-      { name: 'Vachette Cognac & Zèbre Noir', hex: '#9a6b3e', previewUrl: '' },
-      { name: 'Vachette Fumé & Rayures Écru', hex: '#4c3a2a', previewUrl: '' },
-    ],
     details: [
       'Soufflet zébré extensible sur les deux flancs',
       'Séparateur amovible avec poche à chaussures',
@@ -587,10 +524,6 @@ export const PRODUCTS: Product[] = [
       detail: '/assets/imgs/knt.jpeg',
       lifestyle: '/assets/imgs/kni.jpeg',
     },
-    colors: [
-      { name: 'Brillant Blanc & Sangle Graphite', hex: '#f4f4f2', previewUrl: '' },
-      { name: 'Brillant Noir Profond', hex: '#141416', previewUrl: '' },
-    ],
     details: [
       'Harnais côtelé en relief inspiré des rayures zébrées',
       'Boucle Fidlock magnétique à ouverture rapide',
@@ -621,10 +554,6 @@ export const PRODUCTS: Product[] = [
       main: '/assets/imgs/tomss.jpeg',
       hover: '/assets/imgs/tsh.jpeg',
     },
-    colors: [
-      { name: 'Brillant Blanc & Sangle Graphite', hex: '#f4f4f2', previewUrl: '' },
-      { name: 'Brillant Noir Profond', hex: '#141416', previewUrl: '' },
-    ],
     details: [
       'Harnais côtelé en relief inspiré des rayures zébrées',
       'Boucle Fidlock magnétique à ouverture rapide',

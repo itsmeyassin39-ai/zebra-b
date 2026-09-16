@@ -9,7 +9,7 @@ interface CategoryPageProps {
   currentCurrency: Currency;
   wishlistIds: string[];
   onQuickView: (product: Product) => void;
-  onAddToCart: (product: Product, colorIndex?: number) => void;
+  onAddToCart: (product: Product, selectedImage?: string) => void;
   onToggleWishlist: (product: Product) => void;
   onHome: () => void;
 }
@@ -49,7 +49,6 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
   const { products, categories } = useStore();
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null);
   const [addedAnimationId, setAddedAnimationId] = useState<string | null>(null);
-  const [activeColorMap, setActiveColorMap] = useState<Record<string, number>>({});
 
   const category = categories.find((c) => c.id === categoryId);
   const categoryProducts = products.filter((p) => p.category === categoryId);
@@ -68,54 +67,86 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
 
   const handleQuickAdd = (e: React.MouseEvent, product: Product) => {
     e.stopPropagation();
-    onAddToCart(product);
+    onAddToCart(product, product.images.main);
     setAddedAnimationId(product.id);
     setTimeout(() => setAddedAnimationId(null), 1500);
   };
 
   return (
-    <div className="min-h-screen bg-white text-zinc-900 pt-28 pb-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Back + Header */}
-        <div className="mb-10">
-          <button
-            onClick={onHome}
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors cursor-pointer mb-6"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            Retour à l'accueil
-          </button>
+    <div className="min-h-screen bg-white text-zinc-900">
+      {/* Category Hero Banner */}
+      <section className="relative bg-[#111114] text-white py-16 sm:py-24 overflow-hidden border-b border-zinc-800">
+        <div
+          className="absolute inset-0 opacity-20 bg-cover bg-center"
+          style={{ backgroundImage: category ? `url(${category.image})` : undefined }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#111114] via-[#111114]/80 to-transparent" />
 
-          <div className="space-y-3 text-left">
-            <div className="flex items-center gap-2 text-[11px] font-mono tracking-[0.3em] uppercase text-zinc-500">
-              <span className="w-6 h-px bg-zinc-400" />
-              <span>Catalogue Boutique</span>
-            </div>
-            <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-zinc-900 uppercase">
-              {category?.name ?? 'Catégorie'}
-            </h1>
-            {category?.tagline && (
-              <p className="text-sm text-zinc-600 max-w-xl font-light">
-                {category.tagline}
-              </p>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-left">
+          {/* Breadcrumbs */}
+          <nav className="flex items-center gap-2 text-xs text-zinc-400 font-mono uppercase tracking-widest mb-6">
+            <button onClick={onHome} className="hover:text-white transition-colors cursor-pointer flex items-center gap-1">
+              <ChevronLeft className="w-3.5 h-3.5" />
+              Accueil
+            </button>
+            <span>/</span>
+            <span className="text-white">{category?.name || 'Catégorie'}</span>
+          </nav>
+
+          <div className="max-w-2xl">
+            {category?.badge && (
+              <span className="inline-block px-3 py-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-200 mb-4">
+                {category.badge}
+              </span>
             )}
-            <p className="text-xs text-zinc-400 font-mono uppercase tracking-widest">
-              {categoryProducts.length} {categoryProducts.length > 1 ? 'pièces' : 'pièce'}
+            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-4">
+              {category?.name}
+            </h1>
+            <p className="text-sm sm:text-base text-zinc-300 font-light leading-relaxed">
+              {category?.tagline}
+            </p>
+            <p className="text-xs font-mono text-zinc-400 mt-4">
+              {categoryProducts.length} modèle{categoryProducts.length > 1 ? 's' : ''} disponible{categoryProducts.length > 1 ? 's' : ''}
             </p>
           </div>
         </div>
+      </section>
 
-        {/* Product Grid */}
+      {/* Category Navigation Pills */}
+      <div className="border-b border-zinc-200 bg-zinc-50 sticky top-16 z-20 backdrop-blur-md bg-zinc-50/90">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 overflow-x-auto scrollbar-none flex items-center gap-2">
+          {categories.map((c) => {
+            const isCurrent = c.id === categoryId;
+            const count = products.filter((p) => p.category === c.id).length;
+            return (
+              <a
+                key={c.id}
+                href={`#category/${c.id}`}
+                className={`px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${
+                  isCurrent
+                    ? 'bg-black text-white shadow-xs'
+                    : 'bg-white text-zinc-700 hover:bg-zinc-200/70 border border-zinc-200'
+                }`}
+              >
+                {c.name} ({count})
+              </a>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Products Grid */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         {categoryProducts.length === 0 ? (
-          <div className="text-center py-20 bg-zinc-50 rounded-2xl border border-zinc-200">
-            <p className="text-zinc-500 font-mono text-sm uppercase tracking-wider mb-4">
-              Aucune création trouvée dans cette catégorie.
+          <div className="py-24 text-center space-y-4">
+            <p className="text-zinc-500 font-mono text-sm">
+              Aucun produit disponible dans cette catégorie pour le moment.
             </p>
             <button
               onClick={onHome}
               className="px-6 py-2.5 bg-black text-white rounded-full text-xs uppercase tracking-widest font-bold hover:bg-zinc-800 transition-colors cursor-pointer"
             >
-              Retour à l'accueil
+              Retour aux Collections
             </button>
           </div>
         ) : (
@@ -125,11 +156,7 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
               const isAdded = addedAnimationId === product.id;
               const isHovered = hoveredProduct === product.id;
               const isOutOfStock = product.stockCount <= 0;
-              const productColors = Array.isArray(product.colors) ? product.colors : [];
-              const activeColorIdx = activeColorMap[product.id] ?? -1;
-              const activeColorPreview =
-                activeColorIdx >= 0 ? productColors[activeColorIdx]?.previewUrl?.trim() : '';
-              const cardImage = activeColorPreview || (isHovered ? product.images.hover || product.images.main : product.images.main);
+              const cardImage = isHovered ? product.images.hover || product.images.main : product.images.main;
 
               return (
                 <div
@@ -241,29 +268,6 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
                       </h3>
                     </div>
 
-                    {/* Colors */}
-                    {productColors.length > 0 && (
-                      <div className="flex items-center gap-1.5 mt-1">
-                        {productColors.map((color, i) => (
-                          <button
-                            key={`${product.id}-color-${i}`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setActiveColorMap((m) => ({ ...m, [product.id]: i }));
-                            }}
-                            title={color.name || `Couleur ${i + 1}`}
-                            aria-label={`Couleur : ${color.name || `Couleur ${i + 1}`}`}
-                            className={`w-4 h-4 rounded-full border transition-all cursor-pointer ${
-                              activeColorIdx === i
-                                ? 'ring-2 ring-zinc-900 ring-offset-1 border-white scale-110'
-                                : 'border-zinc-300 hover:scale-110 hover:border-zinc-500'
-                            }`}
-                            style={{ backgroundColor: color.hex || '#111111' }}
-                          />
-                        ))}
-                      </div>
-                    )}
-
                     <div className="flex items-baseline gap-2">
                       {product.originalPrice && (
                         <span className="text-xs text-zinc-400 line-through font-mono">
@@ -274,18 +278,6 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
                         {formatPrice(product.price, currentCurrency)}
                       </span>
                     </div>
-
-                    {/* Product reviews are shown in the quick-view card. */}
-                    {/*
-                              <p className="text-[10px] text-zinc-400 font-mono">
-                                — {topReview.author}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })()}
-                    */}
                   </div>
                 </div>
               );

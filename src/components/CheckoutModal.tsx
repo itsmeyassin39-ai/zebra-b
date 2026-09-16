@@ -97,10 +97,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           name: it.product.name,
           price: it.product.price,
           quantity: it.quantity,
-          color: it.selectedColor.name,
           hardware: it.selectedHardware,
           monogram: it.personalizedMonogram,
-          image: it.product.images.main,
+          image: it.selectedImage || it.product.images.main,
         })),
         subtotal: rawSubtotal,
         discountPercent: appliedDiscountPercent,
@@ -295,7 +294,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     <div key={it.id} className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2.5 overflow-hidden">
                         <img
-                          src={it.product.images.main}
+                          src={it.selectedImage || it.product.images.main}
                           alt={it.product.name}
                           referrerPolicy="no-referrer"
                           className="w-10 h-10 rounded-lg object-cover border border-zinc-800 shrink-0 bg-zinc-900"
@@ -303,7 +302,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                         <div className="truncate">
                           <p className="font-bold text-white truncate">{it.product.name}</p>
                           <span className="text-[10px] text-zinc-400 font-mono">
-                            Qté : {it.quantity} • {it.selectedColor.name.split(' ')[0]}
+                            Qté : {it.quantity}{it.selectedHardware ? ` • ${it.selectedHardware.split(' or ')[0].slice(0, 15)}` : ''}
                           </span>
                         </div>
                       </div>

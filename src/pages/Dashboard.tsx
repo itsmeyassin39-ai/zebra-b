@@ -30,34 +30,8 @@ import {
   Link,
   ArrowUp,
   ArrowDown,
-  Palette,
 } from 'lucide-react';
-import { Product, CategoryInfo, ProductColor, Order, OrderStatus, Currency, CustomerReview, WhatsAppPicture } from '../types';
-
-export const LUXURY_COLOR_PRESETS: { name: string; hex: string }[] = [
-  { name: 'Noir Ébène', hex: '#111111' },
-  { name: 'Blanc Alabastre', hex: '#f5f5f4' },
-  { name: 'Camel Gold', hex: '#8a6d4f' },
-  { name: 'Marron Chocolat', hex: '#3d271d' },
-  { name: 'Orange Hermès', hex: '#e05915' },
-  { name: 'Bordeaux Royal', hex: '#5c1d24' },
-  { name: 'Vert Forêt', hex: '#2c3a2e' },
-  { name: 'Bleu Marine', hex: '#1f2937' },
-  { name: 'Beige Sable', hex: '#d9cbb4' },
-  { name: 'Gris Anthracite', hex: '#374151' },
-  { name: 'Doré / Champagne', hex: '#c5a059' },
-  { name: 'Argent Palladié', hex: '#b8b8b8' },
-  { name: 'Rose Poudré', hex: '#e7c6c3' },
-  { name: 'Kaki Militaire', hex: '#4b5320' },
-];
-
-export function getSuggestedColorName(hex: string, index: number = 0): string {
-  if (!hex) return `Couleur ${index + 1}`;
-  const norm = hex.toLowerCase().trim();
-  const match = LUXURY_COLOR_PRESETS.find((p) => p.hex.toLowerCase() === norm);
-  if (match) return match.name;
-  return `Couleur ${index + 1}`;
-}
+import { Product, CategoryInfo, Order, OrderStatus, Currency, CustomerReview, WhatsAppPicture } from '../types';
 import { useStore } from '../store/StoreContext';
 import { logout, getRememberedEmail, getToken } from '../store/auth';
 import { api } from '../api/client';
@@ -132,7 +106,6 @@ interface ProductFormState {
   detail: string;
   lifestyle: string;
   gallery: string[];
-  colors: ProductColor[];
   material: string;
   lining: string;
   hardware: string;
@@ -161,7 +134,6 @@ const emptyProductForm = (categoryId: string, categoryName: string): ProductForm
   detail: '',
   lifestyle: '',
   gallery: [],
-  colors: [{ name: 'Noir Ébène', hex: '#111111', previewUrl: '' }],
   material: '',
   lining: '',
   hardware: 'Argent brossé Palladium',
@@ -174,14 +146,6 @@ const emptyProductForm = (categoryId: string, categoryName: string): ProductForm
 
 function productToForm(p: Product): ProductFormState {
   const mainImg = p.images?.main ?? '';
-  const parsedColors: ProductColor[] =
-    Array.isArray(p.colors) && p.colors.length > 0
-      ? p.colors.map((c, idx) => ({
-          name: c?.name?.trim() || getSuggestedColorName(c?.hex || '#111111', idx),
-          hex: c?.hex?.trim() || '#111111',
-          previewUrl: c?.previewUrl ?? '',
-        }))
-      : [{ name: 'Noir Ébène', hex: '#111111', previewUrl: mainImg }];
 
   return {
     name: p.name ?? '',
@@ -201,7 +165,6 @@ function productToForm(p: Product): ProductFormState {
     detail: p.images?.detail ?? '',
     lifestyle: p.images?.lifestyle ?? '',
     gallery: (p.images?.gallery ?? []).filter(Boolean),
-    colors: parsedColors,
     material: p.material ?? '',
     lining: p.lining ?? '',
     hardware: p.hardware ?? 'Argent brossé Palladium',
@@ -402,23 +365,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
       store.categories.find((c) => c.id === productForm.category) || store.categories[0];
     const main = productForm.main.trim();
 
-    // Sanitize and preserve all colors with smart name fallback
-    const rawColors = Array.isArray(productForm.colors) ? productForm.colors : [];
-    const sanitizedColors: ProductColor[] = rawColors
-      .map((col, idx) => {
-        const hex = (col?.hex || '#111111').trim();
-        const rawName = (col?.name || '').trim();
-        const name = rawName || getSuggestedColorName(hex, idx);
-        const previewUrl = (col?.previewUrl || '').trim();
-        return { name, hex, previewUrl };
-      })
-      .filter((c) => c.name || c.previewUrl || c.hex);
-
-    const finalColors =
-      sanitizedColors.length > 0
-        ? sanitizedColors
-        : [{ name: 'Noir Ébène', hex: '#111111', previewUrl: main }];
-
     const base = {
       name: productForm.name.trim(),
       tagline: productForm.tagline.trim() || 'Nouvelle pièce signature',
@@ -439,7 +385,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
         lifestyle: productForm.lifestyle.trim() || '',
         gallery: productForm.gallery.filter(Boolean),
       },
-      colors: finalColors,
+      colors: [],
       material: productForm.material,
       hardware: productForm.hardware,
       weight: productForm.weight,
@@ -744,23 +690,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                       <p className="text-xs text-zinc-500 line-clamp-1 mt-0.5">{p.tagline}</p>
                       <div className="mt-3 font-mono font-bold text-lg text-zinc-900">{formatPrice(p.price, 'DH')}</div>
 
-                      {(p.colors?.length ?? 0) > 0 && (
-                        <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                          {p.colors.slice(0, 6).map((c, i) => (
-                            <span
-                              key={i}
-                              title={c.name}
-                              className="w-4 h-4 rounded-full border border-zinc-300"
-                              style={{ backgroundColor: c.hex || '#fafaf9' }}
-                            />
-                          ))}
-                          {(p.colors?.length ?? 0) > 6 && (
-                            <span className="text-[10px] font-mono text-zinc-400">
-                              +{(p.colors?.length ?? 0) - 6}
-                            </span>
-                          )}
-                        </div>
-                      )}
+
 
                       <div className="mt-4 pt-4 border-t border-zinc-100 flex gap-2">
                         <button
@@ -964,257 +894,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                 </div>
               </div>
 
-              {/* Couleurs du produit */}
-              <div className="border-t border-zinc-100 pt-5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-                  <div>
-                    <h3 className="text-sm font-bold text-zinc-900 flex items-center gap-2">
-                      <Palette className="w-4 h-4 text-zinc-700" />
-                      Couleurs disponibles ({productForm.colors.length})
-                    </h3>
-                    <p className="text-xs text-zinc-500 mt-0.5">
-                      Ajoutez des variantes de couleur avec leur photo pour que les clients puissent les choisir.
-                    </p>
-                  </div>
-                </div>
 
-                {/* Quick Presets Bar */}
-                <div className="mb-4 bg-zinc-50 border border-zinc-200 rounded-xl p-3">
-                  <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-600 mb-2">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                    <span>Ajouter en 1 clic (palettes maroquinerie de luxe) :</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {LUXURY_COLOR_PRESETS.map((preset) => {
-                      const alreadyAdded = productForm.colors.some(
-                        (c) => c.name.toLowerCase() === preset.name.toLowerCase() || c.hex.toLowerCase() === preset.hex.toLowerCase()
-                      );
-                      return (
-                        <button
-                          key={preset.name}
-                          type="button"
-                          onClick={() => {
-                            setProductForm((f) => ({
-                              ...f,
-                              colors: [
-                                ...f.colors.filter((c) => c.name.trim() || c.previewUrl),
-                                { name: preset.name, hex: preset.hex, previewUrl: '' },
-                              ],
-                            }));
-                          }}
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
-                            alreadyAdded
-                              ? 'bg-zinc-200/70 border-zinc-300 text-zinc-500 hover:bg-zinc-200'
-                              : 'bg-white border-zinc-200 text-zinc-800 hover:border-black hover:shadow-xs'
-                          }`}
-                          title={`Ajouter ${preset.name}`}
-                        >
-                          <span
-                            className="w-3 h-3 rounded-full border border-black/10 shrink-0"
-                            style={{ backgroundColor: preset.hex }}
-                          />
-                          {preset.name}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Color Cards List */}
-                <div className="space-y-3">
-                  {productForm.colors.map((cl, ci) => (
-                    <div key={ci} className="p-3.5 rounded-xl border border-zinc-200 bg-zinc-50/80 shadow-2xs space-y-3">
-                      <div className="flex items-start gap-2">
-                        <div className="flex-1 space-y-3">
-                          <div className="flex flex-col sm:flex-row gap-2">
-                            <div className="flex-1">
-                              <label className="block text-[11px] font-semibold text-zinc-500 uppercase tracking-wider mb-1">
-                                Nom de la couleur
-                              </label>
-                              <input
-                                className={inputCls}
-                                value={cl.name}
-                                onChange={(e) =>
-                                  setProductForm((f) => ({
-                                    ...f,
-                                    colors: f.colors.map((col, i) =>
-                                      i === ci ? { ...col, name: e.target.value } : col
-                                    ),
-                                  }))
-                                }
-                                placeholder="Ex : Noir Ébène, Camel Gold, Blanc Pur..."
-                              />
-                            </div>
-                            <div className="w-full sm:w-auto">
-                              <label className="block text-[11px] font-semibold text-zinc-500 uppercase tracking-wider mb-1">
-                                Échantillon
-                              </label>
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="color"
-                                  className="w-12 h-10 rounded-lg border border-zinc-300 cursor-pointer bg-white p-1 shrink-0"
-                                  value={cl.hex || '#111111'}
-                                  onChange={(e) => {
-                                    const newHex = e.target.value;
-                                    setProductForm((f) => ({
-                                      ...f,
-                                      colors: f.colors.map((col, i) => {
-                                        if (i !== ci) return col;
-                                        const shouldAutoName = !col.name.trim() || LUXURY_COLOR_PRESETS.some((p) => p.name === col.name);
-                                        return {
-                                          ...col,
-                                          hex: newHex,
-                                          name: shouldAutoName ? getSuggestedColorName(newHex, i) : col.name,
-                                        };
-                                      }),
-                                    }));
-                                  }}
-                                  title="Choisir la couleur"
-                                />
-                                <span className="font-mono text-xs text-zinc-600 bg-white px-2 py-2 rounded-lg border border-zinc-200 uppercase">
-                                  {cl.hex || '#111111'}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Quick change color buttons for this card */}
-                          <div className="flex flex-wrap items-center gap-1">
-                            <span className="text-[10px] text-zinc-400 mr-1">Changer rapidement :</span>
-                            {LUXURY_COLOR_PRESETS.slice(0, 8).map((p) => (
-                              <button
-                                key={p.name}
-                                type="button"
-                                onClick={() =>
-                                  setProductForm((f) => ({
-                                    ...f,
-                                    colors: f.colors.map((col, i) =>
-                                      i === ci ? { ...col, name: p.name, hex: p.hex } : col
-                                    ),
-                                  }))
-                                }
-                                title={`Appliquer ${p.name}`}
-                                className="w-5 h-5 rounded-full border border-zinc-300 hover:scale-115 transition-transform cursor-pointer"
-                                style={{ backgroundColor: p.hex }}
-                              />
-                            ))}
-                          </div>
-
-                          {/* Photo for this variant */}
-                          <div className="pt-1">
-                            <ImageUploadField
-                              label="Photo de cette variante (recommandé pour changer la vue au clic)"
-                              compact
-                              value={cl.previewUrl}
-                              hint="Photo affichée quand le client sélectionne cette couleur"
-                              onChange={(url) =>
-                                setProductForm((f) => ({
-                                  ...f,
-                                  colors: f.colors.map((col, i) =>
-                                    i === ci ? { ...col, previewUrl: url } : col
-                                  ),
-                                }))
-                              }
-                            />
-                            {!cl.previewUrl && productForm.main && (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setProductForm((f) => ({
-                                    ...f,
-                                    colors: f.colors.map((col, i) =>
-                                      i === ci ? { ...col, previewUrl: f.main } : col
-                                    ),
-                                  }))
-                                }
-                                className="mt-1.5 text-xs text-zinc-600 hover:text-black underline cursor-pointer"
-                              >
-                                Utiliser la photo principale du produit
-                              </button>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Actions column */}
-                        <div className="flex flex-col items-center gap-1 shrink-0 mt-6">
-                          {ci > 0 && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setProductForm((f) => {
-                                  const colors = [...f.colors];
-                                  const tmp = colors[ci - 1];
-                                  colors[ci - 1] = colors[ci];
-                                  colors[ci] = tmp;
-                                  return { ...f, colors };
-                                })
-                              }
-                              className="p-1.5 rounded-lg text-zinc-400 hover:text-black hover:bg-zinc-200 transition-colors cursor-pointer"
-                              title="Monter d'un rang"
-                            >
-                              <ArrowUp className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                          {ci < productForm.colors.length - 1 && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setProductForm((f) => {
-                                  const colors = [...f.colors];
-                                  const tmp = colors[ci + 1];
-                                  colors[ci + 1] = colors[ci];
-                                  colors[ci] = tmp;
-                                  return { ...f, colors };
-                                })
-                              }
-                              className="p-1.5 rounded-lg text-zinc-400 hover:text-black hover:bg-zinc-200 transition-colors cursor-pointer"
-                              title="Descendre d'un rang"
-                            >
-                              <ArrowDown className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setProductForm((f) => ({
-                                ...f,
-                                colors: f.colors.filter((_, i) => i !== ci),
-                              }))
-                            }
-                            className="p-1.5 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer mt-1"
-                            title="Retirer cette couleur"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setProductForm((f) => ({
-                        ...f,
-                        colors: [
-                          ...f.colors,
-                          {
-                            name: `Couleur ${f.colors.length + 1}`,
-                            hex: '#111111',
-                            previewUrl: '',
-                          },
-                        ],
-                      }))
-                    }
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-300 bg-white text-zinc-800 text-sm font-bold hover:bg-zinc-50 transition-colors cursor-pointer shadow-2xs"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Ajouter une nouvelle couleur
-                  </button>
-                </div>
-              </div>
 
               {/* Avancé (replié) */}
               <div className="border-t border-zinc-100 pt-4">
@@ -2045,8 +1725,7 @@ const OrdersTab: React.FC<{ liveOrder: Order | null }> = ({ liveOrder }) => {
                   <div className="space-y-3">
                     {o.items.map((it, i) => {
                       const catalogProduct = products.find((p) => p.id === it.productId);
-                      const catalogColor = catalogProduct?.colors.find((c) => c.name === it.color);
-                      const itemImage = catalogColor?.previewUrl?.trim() || it.image || catalogProduct?.images.main;
+                      const itemImage = it.image || catalogProduct?.images.main;
                       return (
                         <div key={i} className="flex items-center gap-4 p-2.5 rounded-xl bg-zinc-50 border border-zinc-100">
                           {itemImage ? (
@@ -2054,7 +1733,7 @@ const OrdersTab: React.FC<{ liveOrder: Order | null }> = ({ liveOrder }) => {
                               src={itemImage}
                               alt={it.name}
                               referrerPolicy="no-referrer"
-                              className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border border-zinc-200 shrink-0 bg-zinc-100"
+                              className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border border-zinc-200 shrink-0 bg-zinc-100 shadow-2xs"
                             />
                           ) : (
                             <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-zinc-100 border border-zinc-200 shrink-0 flex items-center justify-center">
@@ -2063,18 +1742,11 @@ const OrdersTab: React.FC<{ liveOrder: Order | null }> = ({ liveOrder }) => {
                           )}
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold text-sm text-zinc-900 truncate">{it.name}</p>
-                            <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
-                              {catalogColor?.hex && (
-                                <span
-                                  className="w-3.5 h-3.5 rounded-full border border-zinc-300 shrink-0"
-                                  style={{ backgroundColor: catalogColor.hex }}
-                                  title={catalogColor.name}
-                                />
-                              )}
-                              <p className="text-[11px] text-zinc-500 truncate">
-                                {it.color}{it.hardware ? ` · ${it.hardware}` : ''}
+                            {it.hardware && (
+                              <p className="text-[11px] text-zinc-500 truncate mt-0.5">
+                                {it.hardware}
                               </p>
-                            </div>
+                            )}
                             {it.monogram && (
                               <p className="text-[11px] text-zinc-400 italic mt-0.5">Monogramme : {it.monogram}</p>
                             )}
