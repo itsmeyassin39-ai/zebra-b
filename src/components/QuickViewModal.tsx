@@ -269,10 +269,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                     {product.dimensions.width} × {product.dimensions.height} {product.dimensions.unit}
                   </span>
                 </div>
-                <div className="rounded-xl bg-zinc-900/60 border border-zinc-800 p-3">
-                  <span className="block text-[9px] font-mono uppercase tracking-widest text-zinc-500">Quincaillerie</span>
-                  <span className="block text-xs text-zinc-200 mt-1 leading-snug">{product.hardware}</span>
-                </div>
+                
               </div>
             </div>
 
